@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_1/features/courses/presentation/pages/courseDetail_page.dart';
@@ -234,9 +236,8 @@ class _CourseDashboardState extends State<CourseDashboard>
         ],
       ),
     );
-
     if (confirm == true) {
-      await courseController.deleteCourseFromList(course.id);
+      await courseController.deleteCourseFromList(course.id ?? "");
 
       Get.snackbar(
         "Curso eliminado",

@@ -21,6 +21,7 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
 
   @override
   Future<CourseModel> create(CourseModel course) async {
+    print(  "Creando curso: ${course.name}, Teacher ID: ${course.teacherId}, Max Students: ${course.maxStudents}"  );
     final body = {
       "tableName": "courses",
       "records": [
@@ -28,6 +29,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
           "name": course.name,
           "code": course.code,
           "teacher_id": course.teacherId,
+          "created_at": course.createdAt,
+          "max_students": course.maxStudents,
         },
       ],
     };
@@ -103,6 +106,7 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
         "name": course.name,
         "code": course.code,
         "teacher_id": course.teacherId,
+        "max_students": course.maxStudents,
       },
     };
 
@@ -161,7 +165,7 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
 
     logInfo("📡 Eliminar curso → status: ${response.statusCode}");
     if (response.statusCode != 200) {
-      throw Exception("❌ Error eliminando curso: ${response.body}");
+      throw Exception("❌ Error eliminando curso: course ${response.body}");
     }
   }
 }

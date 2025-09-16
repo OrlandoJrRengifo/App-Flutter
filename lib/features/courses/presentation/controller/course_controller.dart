@@ -133,8 +133,12 @@ class CoursesController extends GetxController {
     }
   }
 
-  Future<void> deleteCourseFromList(String? id) async {
-    if (id == null) return;
+  Future<void> deleteCourseFromList(String id) async {
+    print("Curso ID en funcion: $id");
+    if (id.isEmpty) {
+      error.value = "ID de curso inválido";
+      return;
+    }
 
     try {
       loading.value = true;
