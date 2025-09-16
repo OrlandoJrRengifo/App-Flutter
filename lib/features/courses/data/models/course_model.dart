@@ -2,29 +2,33 @@ import '../../domain/entities/course.dart';
 
 class CourseModel extends Course {
   CourseModel({
-    int? id,
+    String? id,
     required String name,
     required String code,
-    required int teacherId,
+    required String teacherId,
     required int maxStudents,
     DateTime? createdAt,
   }) : super(
-          id: id,
-          name: name,
-          code: code,
-          teacherId: teacherId,
-          maxStudents: maxStudents,
-          createdAt: createdAt,
-        );
+         id: id,
+         name: name,
+         code: code,
+         teacherId: teacherId,
+         maxStudents: maxStudents,
+         createdAt: createdAt,
+       );
 
   factory CourseModel.fromMap(Map<String, dynamic> m) {
     return CourseModel(
-      id: m['id'] is int ? m['id'] as int : (m['id'] != null ? int.parse(m['id'].toString()) : null),
+      id: m['_id']?.toString(), 
       name: m['name'] as String,
       code: m['code'] as String,
-      teacherId: m['teacherId'] is int ? m['teacherId'] as int : int.parse(m['teacherId'].toString()),
-      maxStudents: m['maxStudents'] is int ? m['maxStudents'] as int : int.parse(m['maxStudents'].toString()),
-      createdAt: m['createdAt'] != null ? DateTime.parse(m['createdAt'] as String) : null,
+      teacherId: m['teacher_id'] as String, 
+      maxStudents: m['maxStudents'] != null
+          ? int.tryParse(m['maxStudents'].toString()) ?? 0
+          : 0,
+      createdAt: m['created_at'] != null && m['created_at'] != "null"
+          ? DateTime.tryParse(m['created_at'].toString())
+          : null,
     );
   }
 
@@ -32,19 +36,18 @@ class CourseModel extends Course {
     final map = <String, dynamic>{
       'name': name,
       'code': code,
-      'teacherId': teacherId,
+      'teacher_id': teacherId,
       'maxStudents': maxStudents,
     };
-    
-    if (id != null) map['id'] = id;
+    if (id != null) map['_id'] = id;
     return map;
   }
 
   CourseModel copyWith({
-    int? id,
+    String? id,
     String? name,
     String? code,
-    int? teacherId,
+    String? teacherId,
     int? maxStudents,
     DateTime? createdAt,
   }) {

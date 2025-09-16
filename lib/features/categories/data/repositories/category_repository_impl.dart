@@ -24,16 +24,16 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<void> delete(int id) => localDataSource.delete(id);
+  Future<void> delete(String id) => localDataSource.delete(id);
 
   @override
-  Future<Category?> getById(int id) async {
+  Future<Category?> getById(String id) async {
     final model = await localDataSource.getById(id);
     return model;
   }
 
   @override
-  Future<List<Category>> listByCourse(int courseId) async {
+  Future<List<Category>> listByCourse(String courseId) async {
     final models = await localDataSource.listByCourse(courseId);
     return models;
   }

@@ -1,8 +1,8 @@
 class Course {
-  final int? id;
+  final String? id; 
   final String name;
   final String code;
-  final int teacherId;
+  final String teacherId;
   final int maxStudents;
   final DateTime? createdAt;
 
@@ -16,10 +16,10 @@ class Course {
   });
 
   Course copyWith({
-    int? id,
+    String? id,
     String? name,
     String? code,
-    int? teacherId,
+    String? teacherId,
     int? maxStudents,
     DateTime? createdAt,
   }) {

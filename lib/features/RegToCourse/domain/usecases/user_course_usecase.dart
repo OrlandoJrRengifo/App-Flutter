@@ -5,12 +5,12 @@ class UserCourseUseCase {
 
   UserCourseUseCase(this.repository);
 
-  Future<void> enrollUser(int userId, int courseId) =>
+  Future<void> enrollUser(String userId, String courseId) =>
       repository.enrollUser(userId, courseId);
 
-  Future<List<int>> getUserCourses(int userId) =>
+  Future<List<String>> getUserCourses(String userId) =>
       repository.getUserCourses(userId);
 
-  Future<List<int>> getCourseUsers(int courseId) =>
+  Future<List<String>> getCourseUsers(String courseId) =>
       repository.getCourseUsers(courseId);
 }

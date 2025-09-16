@@ -478,7 +478,7 @@ class _CourseDashboardState extends State<CourseDashboard>
         onTap: () {
 
           Get.to(
-            () => CategoriesPage(courseId: course.id!),
+            () => CategoriesPage(courseId: course.id ?? ""),
             transition: Transition.rightToLeft,
           );
 

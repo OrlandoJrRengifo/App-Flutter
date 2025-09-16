@@ -1,8 +1,8 @@
 enum GroupingMethod { random, selfAssigned }
 
 class Category {
-  final int? id;
-  final int courseId;
+  final String? id;
+  final String courseId;
   final String name;
   final GroupingMethod groupingMethod;
   final int? maxGroupSize;
@@ -18,8 +18,8 @@ class Category {
   });
 
   Category copyWith({
-    int? id,
-    int? courseId,
+    String? id,
+    String? courseId,
     String? name,
     GroupingMethod? groupingMethod,
     int? maxGroupSize,

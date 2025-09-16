@@ -6,7 +6,7 @@ import '../../controllers/categories_controller.dart';
 import '../widgets/category_form.dart';
 
 class CategoriesPage extends StatefulWidget {
-  final int courseId;
+  final String courseId;
   final String? courseName; 
   
   const CategoriesPage({

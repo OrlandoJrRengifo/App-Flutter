@@ -1,6 +1,6 @@
 
 abstract class IUserCourseSource {
-  Future<void> enrollUser(int userId, int courseId);
-  Future<List<int>> getUserCourses(int userId);
-  Future<List<int>> getCourseUsers(int courseId);
+  Future<void> enrollUser(String userId, String courseId);
+  Future<List<String>> getUserCourses(String userId);
+  Future<List<String>> getCourseUsers(String courseId);
 }

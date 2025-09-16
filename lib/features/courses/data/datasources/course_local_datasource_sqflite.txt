@@ -56,7 +56,7 @@ class CourseLocalDataSourceSqflite implements ICourseLocalDataSource {
   }
 
   @override
-  Future<List<CourseModel>> listByTeacher(int teacherId) async {
+  Future<List<CourseModel>> listByTeacher(String teacherId) async {
     final db = await _db;
     final maps = await db.query(
       'courses',
@@ -97,7 +97,7 @@ class CourseLocalDataSourceSqflite implements ICourseLocalDataSource {
   }
 
   @override
-  Future<int> countByTeacher(int teacherId) async {
+  Future<int> countByTeacher(String teacherId) async {
     final db = await _db;
     final result = await db.rawQuery(
       'SELECT COUNT(*) as count FROM courses WHERE teacherId = ?',

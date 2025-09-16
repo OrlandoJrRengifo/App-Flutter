@@ -5,7 +5,7 @@ import '../../domain/entities/category.dart';
 
 class CategoryFormDialog extends StatefulWidget {
   final Category? category;
-  final int courseId;
+  final String courseId;
   
   const CategoryFormDialog({
     this.category, 

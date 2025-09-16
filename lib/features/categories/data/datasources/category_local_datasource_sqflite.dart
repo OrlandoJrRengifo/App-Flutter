@@ -19,13 +19,13 @@ class CategoryLocalDataSourceSqflite implements ICategoryLocalDataSource {
   }
 
   @override
-  Future<void> delete(int id) async {
+  Future<void> delete(String id) async {
     final db = await _db;
     await db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 
   @override
-  Future<CategoryModel?> getById(int id) async {
+  Future<CategoryModel?> getById(String id) async {
     final db = await _db;
     final maps = await db.query(
       'categories',
@@ -39,7 +39,7 @@ class CategoryLocalDataSourceSqflite implements ICategoryLocalDataSource {
   }
 
   @override
-  Future<List<CategoryModel>> listByCourse(int courseId) async {
+  Future<List<CategoryModel>> listByCourse(String courseId) async {
     final db = await _db;
     final maps = await db.query(
       'categories',

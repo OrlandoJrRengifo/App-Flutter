@@ -7,14 +7,14 @@ class UserCourseRepository implements IUserCourseRepository {
   UserCourseRepository(this.localDataSource);
 
   @override
-  Future<void> enrollUser(int userId, int courseId) =>
+  Future<void> enrollUser(String userId, String courseId) =>
       localDataSource.enrollUser(userId, courseId);
 
   @override
-  Future<List<int>> getUserCourses(int userId) =>
+  Future<List<String>> getUserCourses(String userId) =>
       localDataSource.getUserCourses(userId);
 
   @override
-  Future<List<int>> getCourseUsers(int courseId) =>
+  Future<List<String>> getCourseUsers(String courseId) =>
       localDataSource.getCourseUsers(courseId);
 }

@@ -12,7 +12,7 @@ class CategoriesController extends GetxController {
   final RxBool loading = false.obs;
   final RxString error = ''.obs;
   
-  Future<void> loadCategories(int courseId) async {
+  Future<void> loadCategories(String courseId) async {
     try {
       loading.value = true;
       error.value = '';
@@ -28,7 +28,7 @@ class CategoriesController extends GetxController {
   }
   
   Future<void> addCategory({
-    required int courseId,
+    required String courseId,
     required String name,
     required GroupingMethod groupingMethod,
     required int maxMembers,
@@ -72,7 +72,7 @@ class CategoriesController extends GetxController {
     }
   }
   
-  Future<void> deleteCategoryFromList(int? id) async {
+  Future<void> deleteCategoryFromList(String? id) async {
     if (id == null) return;
     
     try {

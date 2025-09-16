@@ -8,7 +8,7 @@ class CategoryUseCases {
   CategoryUseCases(this.repository);
 
   Future<Category> createCategory({
-    required int courseId,
+    required String courseId,
     required String name,
     required GroupingMethod groupingMethod,
     required int maxMembers,
@@ -23,16 +23,16 @@ class CategoryUseCases {
     );
   }
 
-  Future<void> deleteCategory(int id) => repository.delete(id);
+  Future<void> deleteCategory(String id) => repository.delete(id);
   
-  Future<Category?> getCategory(int id) => repository.getById(id);
-  
-  Future<List<Category>> listCategories(int courseId) => repository.listByCourse(courseId);
+  Future<Category?> getCategory(String id) => repository.getById(id);
+
+  Future<List<Category>> listCategories(String courseId) => repository.listByCourse(courseId);
   
   Future<Category> updateCategory(Category category) => repository.update(category);
 
   Future<List<List<int>>> formRandomGroups(
-    int categoryId,
+    String categoryId,
     List<int> students,
   ) async {
     final cat = await repository.getById(categoryId);
