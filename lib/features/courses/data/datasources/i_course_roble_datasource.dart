@@ -7,4 +7,5 @@ abstract class ICourseRobleDataSource {
   Future<CourseModel> update(CourseModel course);
   Future<int> countByTeacher(String teacherId);
   Future<void> delete(String id);
+  Future<CourseModel?> getByCode(String code);
 }

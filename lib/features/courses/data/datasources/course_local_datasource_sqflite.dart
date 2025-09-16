@@ -94,6 +94,24 @@ class CourseLocalDataSourceSqflite implements ICourseLocalDataSource {
     return CourseModel.fromMap(maps.first);
   }
 
+   @override
+  Future<CourseModel?> getByCode(String code) async {
+    final db = await _db;
+
+    final maps = await db.query(
+      'courses',
+      where: 'code = ?',
+      whereArgs: [code],
+      limit: 1,
+    );
+    if (maps.isEmpty) {
+      print("⚠️ No se encontró curso con code=$code");
+      return null;
+    }
+    print("📌 Curso encontrado por code=$code → ${maps.first}");
+    return CourseModel.fromMap(maps.first);
+  }
+
   @override
   Future<int> countByTeacher(String teacherId) async {
     final db = await _db;

@@ -36,7 +36,7 @@ class CourseRepository implements ICourseRepository {
 
 @override
   Future<Course?> getByCode(String code) async {
-    final model = await localDataSource.getByCode(code);
+    final model = await robleDataSource.getByCode(code);
     return model;
   }
 

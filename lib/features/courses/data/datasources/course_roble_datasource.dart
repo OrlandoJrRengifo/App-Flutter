@@ -168,4 +168,23 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
       throw Exception("❌ Error eliminando curso: course ${response.body}");
     }
   }
+
+   @override
+  Future<CourseModel?> getByCode(String code) async {
+   /* final db = await _db;
+
+    final maps = await db.query(
+      'courses',
+      where: 'code = ?',
+      whereArgs: [code],
+      limit: 1,
+    );
+    if (maps.isEmpty) {
+      print("⚠️ No se encontró curso con code=$code");
+      return null;
+    }
+    print("📌 Curso encontrado por code=$code → ${maps.first}");
+    return CourseModel.fromMap(maps.first);
+    */
+  }
 }

@@ -4,7 +4,7 @@ import '../../../auth/presentation/controller/auth_controller.dart';
 import '../../../RegToCourse/presentation/controller/user_course_controller.dart';
 
 class StudentslistPage extends StatefulWidget {
-  final int courseId;
+  final String courseId;
 
   const StudentslistPage({
     super.key,
