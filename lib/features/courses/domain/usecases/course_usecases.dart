@@ -31,6 +31,8 @@ class CourseUseCases {
   Future<void> deleteCourse(int id) => repository.delete(id);
   
   Future<Course?> getCourse(int id) => repository.getById(id);
+
+  Future<Course?> getCourseByCode(String code) => repository.getByCode(code);
   
   Future<List<Course>> listCoursesByTeacher(int teacherId) => 
       repository.listByTeacher(teacherId);

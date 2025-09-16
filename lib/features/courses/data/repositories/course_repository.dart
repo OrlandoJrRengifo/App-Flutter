@@ -32,6 +32,12 @@ class CourseRepository implements ICourseRepository {
     return model;
   }
 
+@override
+  Future<Course?> getByCode(String code) async {
+    final model = await localDataSource.getByCode(code);
+    return model;
+  }
+
   @override
   Future<List<Course>> listByTeacher(int teacherId) async {
     final models = await localDataSource.listByTeacher(teacherId);

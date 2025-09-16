@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/features/courses/presentation/pages/courseDetail_page.dart';
 import 'package:get/get.dart';
 
 import '../../domain/entities/course.dart';
 import '../widgets/course_form_dialog.dart';
 import '../controller/course_controller.dart';
 import '../../../RegToCourse/presentation/controller/user_course_controller.dart';
-import '../../../categories/presentation/pages/categories_page.dart';
 import '../../../auth/presentation/controller/auth_controller.dart';
+import '../../../auth/presentation/pages/login_page.dart';
+import 'courseDetail_page.dart';
 
 class CourseDashboard extends StatefulWidget {
   const CourseDashboard({Key? key}) : super(key: key);
@@ -24,7 +24,6 @@ class _CourseDashboardState extends State<CourseDashboard>
   late final UserCourseController userCourseController;
   String? copiedCode;
   final RxList<Course> _enrolledCourses = <Course>[].obs;
-  // Por ahora asumimos role de teacher, esto debería venir del auth
   String userRole = "teacher";
 
   @override
@@ -98,7 +97,6 @@ class _CourseDashboardState extends State<CourseDashboard>
 
   void _showJoinCourseDialog() {
     final codeController = TextEditingController();
-
     Get.dialog(
       AlertDialog(
         title: const Text('Unirse al Curso'),
@@ -127,16 +125,79 @@ class _CourseDashboardState extends State<CourseDashboard>
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
-            onPressed: () {
-              // Implementar lógica para unirse al curso
-              Get.back();
-              Get.snackbar(
-                "Falta por hacer",
-                "A-0",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.orange[100],
-                colorText: Colors.orange[800],
+            onPressed: () async {
+              final enteredCode = codeController.text.trim();
+
+              if (enteredCode.isEmpty) {
+                Get.snackbar(
+                  "Error",
+                  "Debes ingresar un código válido",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+                return;
+              }
+
+              // 1️⃣ Buscar el ID del curso por código
+              final courseId = await courseController.getCourseIdByCode(
+                enteredCode,
               );
+
+              if (courseId == null) {
+                Get.snackbar(
+                  "No encontrado",
+                  "No existe un curso con ese código",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+                return;
+              }
+
+              // 2️⃣ Obtener usuario actual
+              final auth = Get.find<AuthenticationController>();
+              final userId = auth.currentUser.value?.id;
+
+              if (userId == null) {
+                Get.snackbar(
+                  "Error",
+                  "Debes iniciar sesión para unirte",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+                return;
+              }
+
+              try {
+                // 3️⃣ Inscribir usuario en el curso
+                await userCourseController.enrollUser(userId, courseId);
+
+                // 4️⃣ Refrescar cursos inscritos
+                await userCourseController.fetchUserCourses(userId);
+                final enrolled = await courseController.loadCoursesByIds(
+                  userCourseController.userCourses,
+                );
+                _enrolledCourses.assignAll(enrolled);
+
+                Get.back();
+                Get.snackbar(
+                  "¡Éxito!",
+                  "Te has inscrito en el curso",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green[100],
+                  colorText: Colors.green[800],
+                );
+              } catch (e) {
+                Get.snackbar(
+                  "Error",
+                  e.toString(),
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+              }
             },
             child: const Text('Unirse al Curso'),
           ),
@@ -288,12 +349,23 @@ class _CourseDashboardState extends State<CourseDashboard>
         actions: [
           OutlinedButton.icon(
             onPressed: () {
-              // Navegación a ajustes, falta por implementar
+              final auth = Get.find<AuthenticationController>();
+              auth.logOut();
+
+              // 🔹 Redirige al Login limpiando navegación previa
+              Get.offAll(() => const LoginPage());
             },
-            icon: const Icon(Icons.settings, size: 16),
-            label: const Text('Ajustes'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.grey[700]),
+            icon: const Icon(Icons.logout, size: 16, color: Colors.red),
+            label: const Text(
+              'Salir',
+              style: TextStyle(color: Colors.red),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+            ),
           ),
+
           const SizedBox(width: 16),
         ],
         bottom: TabBar(
@@ -476,18 +548,11 @@ class _CourseDashboardState extends State<CourseDashboard>
       elevation: 2,
       child: InkWell(
         onTap: () {
-
           Get.to(
-            () => CategoriesPage(courseId: course.id!),
+            () =>
+                CourseDetailPage(courseId: course.id!, courseName: course.name),
             transition: Transition.rightToLeft,
           );
-
-          /*
-          Get.to(
-            () => CourseDetailPage(courseId: course.id!,courseName: course.name),
-            transition: Transition.rightToLeft,
-          );
-          */
         },
         borderRadius: BorderRadius.circular(8),
         child: Padding(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../../../auth/presentation/controller/auth_controller.dart';
-import '../../../RegToCourse/presentation/controller/user_course_controller.dart';
+import 'package:flutter_application_1/features/categories/presentation/pages/categories_page.dart';
+import 'studentsList_page.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final int courseId;
@@ -14,66 +13,52 @@ class CourseDetailPage extends StatefulWidget {
   });
 
   @override
-  State<CourseDetailPage> createState() => _CourseDetailPageState();
+  State<CourseDetailPage> createState() => _CourseTabsPageState();
 }
 
-class _CourseDetailPageState extends State<CourseDetailPage> {
-  final userCourseController = Get.find<UserCourseController>();
-  final authController = Get.find<AuthenticationController>();
-
-  final RxBool loading = false.obs;
-  final RxList<Map<String, dynamic>> students = <Map<String, dynamic>>[].obs;
+class _CourseTabsPageState extends State<CourseDetailPage>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _loadStudents();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
-  Future<void> _loadStudents() async {
-    try {
-      loading.value = true;
-
-      // 🔹 1. Traemos los IDs de los estudiantes inscritos
-      await userCourseController.fetchCourseUsers(widget.courseId);
-      final ids = userCourseController.courseUsers.toList();
-
-      // 🔹 2. Obtenemos la info básica de cada usuario
-      final basicUsers = await authController.getUsers(ids);
-
-      students.assignAll(basicUsers);
-    } catch (e) {
-      print("❌ Error cargando estudiantes: $e");
-    } finally {
-      loading.value = false;
-    }
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Curso: ${widget.courseName}")),
-      body: Obx(() {
-        if (loading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+      appBar: AppBar(
+        title: Text(widget.courseName),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(icon: Icon(Icons.people), text: "Estudiantes"),
+            Tab(icon: Icon(Icons.category), text: "Categorías"),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Página de estudiantes
+          StudentslistPage(
+            courseId: widget.courseId,
+          ),
 
-        if (students.isEmpty) {
-          return const Center(child: Text("No hay estudiantes inscritos"));
-        }
-
-        return ListView.builder(
-          itemCount: students.length,
-          itemBuilder: (context, index) {
-            final student = students[index];
-            return ListTile(
-              leading: CircleAvatar(child: Text(student['name'][0])),
-              title: Text(student['name']),
-              subtitle: Text("ID: ${student['id']}"),
-            );
-          },
-        );
-      }),
+          // Página de categorías
+          CategoriesPage(
+            courseId: widget.courseId,
+          ),
+        ],
+      ),
     );
   }
 }

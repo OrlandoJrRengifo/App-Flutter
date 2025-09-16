@@ -16,8 +16,6 @@ import 'features/courses/data/datasources/i_course_local_datasource.dart';
 import 'features/courses/data/datasources/course_local_datasource_sqflite.dart';
 import 'features/courses/data/repositories/course_repository.dart';
 import 'features/courses/presentation/controller/course_controller.dart'; 
-
-
 // Inscripciones
 import 'features/RegToCourse/domain/repositories/i_user_course_repository.dart';
 import 'features/RegToCourse/domain/usecases/user_course_usecase.dart';
@@ -31,7 +29,7 @@ import 'features/auth/data/datasources/i_auth_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_usecase.dart';
 import 'features/auth/presentation/controller/auth_controller.dart';
-import 'features/auth/presentation/pages/loginScreen.dart';
+import 'features/auth/presentation/pages/login_page.dart';
 
 
 void main() async {
@@ -79,7 +77,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const LoginScreen(),
+      home: const LoginPage(),
     );
   }
 }

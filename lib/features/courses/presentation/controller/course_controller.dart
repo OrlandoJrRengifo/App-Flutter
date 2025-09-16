@@ -58,6 +58,29 @@ class CoursesController extends GetxController {
     }
   }
 
+  Future<int?> getCourseIdByCode(String code) async {
+    try {
+      loading.value = true;
+      error.value = '';
+
+      final course = await useCases.getCourseByCode(code);
+
+      if (course != null) {
+        print("✅ Curso encontrado por code=$code → id=${course.id}");
+        return course.id;
+      } else {
+        print("⚠️ No se encontró curso con code=$code");
+        return null;
+      }
+    } catch (e) {
+      error.value = e.toString();
+      print("❌ Error al buscar curso por code=$code → $e");
+      return null;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   Future<List<Course>> loadCoursesByIds(List<int> courseIds) async {
     try {
       loading.value = true;
