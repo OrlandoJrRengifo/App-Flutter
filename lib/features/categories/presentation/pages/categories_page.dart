@@ -7,12 +7,10 @@ import '../widgets/category_form.dart';
 
 class CategoriesPage extends StatefulWidget {
   final int courseId;
-  final String? courseName; 
-  
+
   const CategoriesPage({
-    super.key, 
+    super.key,
     required this.courseId,
-    this.courseName,
   });
 
   @override
@@ -26,7 +24,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   void initState() {
     super.initState();
     controller = Get.find<CategoriesController>();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.loadCategories(widget.courseId);
     });
@@ -35,28 +33,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Categorías", style: TextStyle(fontSize: 18)),
-            if (widget.courseName != null)
-              Text(
-                widget.courseName!,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-              ),
-          ],
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(), // Volver a CoursesPage
-        ),
-      ),
       body: Obx(() {
         if (controller.loading.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         if (controller.error.isNotEmpty) {
           return Center(
             child: Column(
@@ -74,7 +55,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             ),
           );
         }
-        
+
         if (controller.categories.isEmpty) {
           return const Center(
             child: Column(
@@ -96,7 +77,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             ),
           );
         }
-        
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: controller.categories.length,
@@ -107,15 +88,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: cat.groupingMethod == GroupingMethod.random 
-                      ? Colors.orange[100] 
+                  backgroundColor: cat.groupingMethod == GroupingMethod.random
+                      ? Colors.orange[100]
                       : Colors.green[100],
                   child: Icon(
-                    cat.groupingMethod == GroupingMethod.random 
-                        ? Icons.shuffle 
+                    cat.groupingMethod == GroupingMethod.random
+                        ? Icons.shuffle
                         : Icons.group,
-                    color: cat.groupingMethod == GroupingMethod.random 
-                        ? Colors.orange[800] 
+                    color: cat.groupingMethod == GroupingMethod.random
+                        ? Colors.orange[800]
                         : Colors.green[800],
                   ),
                 ),
@@ -134,8 +115,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     Text(
                       "Método: ${cat.groupingMethod == GroupingMethod.random ? 'Aleatorio' : 'Auto-asignado'}",
                       style: TextStyle(
-                        color: cat.groupingMethod == GroupingMethod.random 
-                            ? Colors.orange[700] 
+                        color: cat.groupingMethod == GroupingMethod.random
+                            ? Colors.orange[700]
                             : Colors.green[700],
                         fontWeight: FontWeight.w500,
                       ),
@@ -154,7 +135,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             category: cat,
                           ),
                         );
-                        
+
                         if (result != null) {
                           await controller.updateCategoryInList(result);
                         }
@@ -177,13 +158,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
                               ),
                               TextButton(
                                 onPressed: () => Get.back(result: true),
-                                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.red,
+                                ),
                                 child: const Text("Eliminar"),
                               ),
                             ],
                           ),
                         );
-                        
+
                         if (confirm == true) {
                           await controller.deleteCategoryFromList(cat.id);
                         }
@@ -208,7 +191,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           final result = await Get.dialog<Category>(
             CategoryFormDialog(courseId: widget.courseId),
           );
-          
+
           if (result != null) {
             try {
               await controller.addCategory(
@@ -217,7 +200,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 groupingMethod: result.groupingMethod,
                 maxMembers: result.maxGroupSize ?? 1,
               );
-              
+
               Get.snackbar(
                 "¡Éxito!",
                 "Categoría '${result.name}' creada correctamente",

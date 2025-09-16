@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_1/features/courses/presentation/pages/courseDetail_page.dart';
 import 'package:get/get.dart';
 
 import '../../domain/entities/course.dart';
 import '../widgets/course_form_dialog.dart';
 import '../controller/course_controller.dart';
 import '../../../RegToCourse/presentation/controller/user_course_controller.dart';
-import '../../../categories/presentation/pages/categories_page.dart';
 import '../../../auth/presentation/controller/auth_controller.dart';
+import 'courseDetail_page.dart';
 
 class CourseDashboard extends StatefulWidget {
   const CourseDashboard({Key? key}) : super(key: key);
@@ -476,18 +475,11 @@ class _CourseDashboardState extends State<CourseDashboard>
       elevation: 2,
       child: InkWell(
         onTap: () {
-
           Get.to(
-            () => CategoriesPage(courseId: course.id!),
+            () =>
+                CourseDetailPage(courseId: course.id!, courseName: course.name),
             transition: Transition.rightToLeft,
           );
-
-          /*
-          Get.to(
-            () => CourseDetailPage(courseId: course.id!,courseName: course.name),
-            transition: Transition.rightToLeft,
-          );
-          */
         },
         borderRadius: BorderRadius.circular(8),
         child: Padding(
