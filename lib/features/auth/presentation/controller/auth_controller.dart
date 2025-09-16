@@ -17,16 +17,13 @@ class AuthenticationController extends GetxController {
     logInfo('AuthenticationController initialized');
   }
 
-  Future<List<Map<String, dynamic>>> getUsers(List<int> userIds) async {
+  Future<List<Map<String, dynamic>>> getUsers(List<String> userIds) async {
     final List<Map<String, dynamic>> result = [];
 
     for (final id in userIds) {
       final user = await _authUseCase.getUser(id);
       if (user != null) {
-        result.add({
-          "id": user.id,
-          "name": user.name,
-        });
+        result.add({"id": user.id, "name": user.name});
       }
     }
 
@@ -44,11 +41,14 @@ class AuthenticationController extends GetxController {
 
   Future<bool> signUp(String email, String name, String password) async {
     logInfo('AuthenticationController: Sign Up $email');
-    final rta = await _authUseCase.signUp(email, name, password);
-    if (rta) {
-      currentUser.value = User(email: email, name: name, password: password);
+
+    final user = await _authUseCase.signUp(email, name, password);
+
+    if (user != null) {
+      currentUser.value = user; // ahora sí contiene el id de Roble
+      return true;
     }
-    return rta;
+    return false;
   }
 
   Future<void> logOut() async {

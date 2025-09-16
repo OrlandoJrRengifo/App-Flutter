@@ -9,7 +9,7 @@ class CourseUseCases {
   Future<Course> createCourse({
     required String name,
     required String code,
-    required int teacherId,
+    required String teacherId,
     required int maxStudents,
   }) async {
     // Limite de 3 cursos por usuario
@@ -28,18 +28,18 @@ class CourseUseCases {
     );
   }
 
-  Future<void> deleteCourse(int id) => repository.delete(id);
+  Future<void> deleteCourse(String id) => repository.delete(id);
   
-  Future<Course?> getCourse(int id) => repository.getById(id);
+  Future<Course?> getCourse(String id) => repository.getById(id);
 
   Future<Course?> getCourseByCode(String code) => repository.getByCode(code);
   
-  Future<List<Course>> listCoursesByTeacher(int teacherId) => 
+  Future<List<Course>> listCoursesByTeacher(String teacherId) => 
       repository.listByTeacher(teacherId);
   
   Future<Course> updateCourse(Course course) => repository.update(course);
 
-  Future<bool> canCreateMore(int teacherId) async {
+  Future<bool> canCreateMore(String teacherId) async {
     final count = await repository.countByTeacher(teacherId);
     return count < 3;
   }

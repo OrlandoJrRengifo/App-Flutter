@@ -6,7 +6,7 @@ class UserCourseSqfliteSource implements IUserCourseSource {
   Future<Database> get db async => await AppDatabase.instance;
 
   @override
-  Future<void> enrollUser(int userId, int courseId) async {
+  Future<void> enrollUser(String userId, String courseId) async {
     final database = await db;
     await database.insert(
       'user_courses',
@@ -16,24 +16,24 @@ class UserCourseSqfliteSource implements IUserCourseSource {
   }
 
   @override
-  Future<List<int>> getUserCourses(int userId) async {
+  Future<List<String>> getUserCourses(String userId) async {
     final database = await db;
     final result = await database.query(
       'user_courses',
       where: 'user_id = ?',
       whereArgs: [userId],
     );
-    return result.map((e) => e['course_id'] as int).toList();
+    return result.map((e) => e['course_id'] as String).toList();
   }
 
   @override
-  Future<List<int>> getCourseUsers(int courseId) async {
+  Future<List<String>> getCourseUsers(String courseId) async {
     final database = await db;
     final result = await database.query(
       'user_courses',
       where: 'course_id = ?',
       whereArgs: [courseId],
     );
-    return result.map((e) => e['user_id'] as int).toList();
+    return result.map((e) => e['user_id'] as String).toList();
   }
 }

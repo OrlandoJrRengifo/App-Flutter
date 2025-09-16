@@ -1,26 +1,35 @@
 class User {
-  int? id;
+  final String? id;        // 👈 ahora opcional
   final String email;
   final String name;
-  final String password;
+  final String? password;
+  final String? avatarUrl;
 
   User({
-    this.id,
+    this.id,               // 👈 opcional en constructor
     required this.email,
     required this.name,
-    required this.password,
+    this.password,
+    this.avatarUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: json['id'],               // UUID (string)
       email: json['email'],
       name: json['name'],
-      password: json['password'],
+      password: json['password'],   // puede venir null
+      avatarUrl: json['avatarUrl'], // puede venir null
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'email': email, 'name': name, 'password': password};
+    return {
+      if (id != null) 'id': id,     // 👈 solo si existe
+      'email': email,
+      'name': name,
+      if (password != null) 'password': password,
+      if (avatarUrl != null) 'avatarUrl': avatarUrl,
+    };
   }
 }

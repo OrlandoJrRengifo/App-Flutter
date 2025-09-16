@@ -33,7 +33,7 @@ class UserCoursesPage extends StatelessWidget {
           future: Future.wait(
             courseIds.map((id) async {
               final c = await courseUseCases.getCourse(id);
-              if (c == null) return Course(id: id, name: "Desconocido", code: "-", maxStudents: 0, teacherId: 0); 
+              if (c == null) return Course(id: id, name: "Desconocido", code: "-", maxStudents: 0, teacherId: "hola"); 
               return c;
               }),
           ),

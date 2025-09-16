@@ -92,7 +92,7 @@ class _CourseFormDialogState extends State<CourseFormDialog> {
                 id: widget.course?.id,
                 name: _name.text.trim(),
                 code: _code.text.trim(),
-                teacherId: widget.course?.teacherId ?? 1, // id de prueba, tiene que ser el del usuario logeado
+                teacherId: widget.course?.teacherId ?? "hola", // id de prueba, tiene que ser el del usuario logeado
                 maxStudents: int.parse(_maxStudents.text),
                 createdAt: widget.course?.createdAt,
               );

@@ -2,8 +2,8 @@ import '../../domain/entities/category.dart';
 
 class CategoryModel extends Category {
   CategoryModel({
-    int? id,
-    required int courseId,
+    String? id,
+    required String courseId,
     required String name,
     required GroupingMethod groupingMethod,
     int? maxGroupSize,
@@ -19,14 +19,14 @@ class CategoryModel extends Category {
 
   factory CategoryModel.fromMap(Map<String, dynamic> m) {
     final idValue = m['id'];
-    final int? id = idValue == null
+    final String? id = idValue == null
         ? null
-        : (idValue is int ? idValue : int.tryParse(idValue.toString()));
+        : (idValue is String ? idValue : idValue.toString());
 
     final courseRaw = m['courseId'];
-    final courseId = courseRaw is int
+    final courseId = courseRaw is String
         ? courseRaw
-        : int.parse(courseRaw.toString()); 
+        : courseRaw.toString();
 
     final name = (m['name'] ?? '').toString();
 
@@ -75,8 +75,8 @@ class CategoryModel extends Category {
   }
 
   CategoryModel copyWith({
-    int? id,
-    int? courseId,
+    String? id,
+    String? courseId,
     String? name,
     GroupingMethod? groupingMethod,
     int? maxGroupSize,

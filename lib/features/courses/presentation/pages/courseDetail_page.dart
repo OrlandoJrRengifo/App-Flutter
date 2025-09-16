@@ -3,7 +3,7 @@ import 'package:flutter_application_1/features/categories/presentation/pages/cat
 import 'studentsList_page.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  final int courseId;
+  final String courseId;
   final String courseName;
 
   const CourseDetailPage({

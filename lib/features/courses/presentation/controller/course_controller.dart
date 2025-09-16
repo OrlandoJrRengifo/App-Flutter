@@ -58,30 +58,7 @@ class CoursesController extends GetxController {
     }
   }
 
-  Future<int?> getCourseIdByCode(String code) async {
-    try {
-      loading.value = true;
-      error.value = '';
-
-      final course = await useCases.getCourseByCode(code);
-
-      if (course != null) {
-        print("✅ Curso encontrado por code=$code → id=${course.id}");
-        return course.id;
-      } else {
-        print("⚠️ No se encontró curso con code=$code");
-        return null;
-      }
-    } catch (e) {
-      error.value = e.toString();
-      print("❌ Error al buscar curso por code=$code → $e");
-      return null;
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  Future<List<Course>> loadCoursesByIds(List<int> courseIds) async {
+  Future<List<Course>> loadCoursesByIds(List<String> courseIds) async {
     try {
       loading.value = true;
       error.value = '';
@@ -156,8 +133,12 @@ class CoursesController extends GetxController {
     }
   }
 
-  Future<void> deleteCourseFromList(int? id) async {
-    if (id == null) return;
+  Future<void> deleteCourseFromList(String id) async {
+    print("Curso ID en funcion: $id");
+    if (id.isEmpty) {
+      error.value = "ID de curso inválido";
+      return;
+    }
 
     try {
       loading.value = true;
@@ -177,6 +158,7 @@ class CoursesController extends GetxController {
 
   Future<bool> canCreateMore() async {
     final userId = _authController.currentUser.value?.id;
+    print(_authController.currentUser.value?.id);
     if (userId == null) return false;
 
     try {

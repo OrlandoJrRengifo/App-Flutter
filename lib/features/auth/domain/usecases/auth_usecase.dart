@@ -5,7 +5,7 @@ class AuthenticationUseCase {
   final IAuthRepository _repository;
   AuthenticationUseCase(this._repository);
 
-  Future<User?> getUser(int userId) async {
+  Future<User?> getUser(String userId) async {
     return await _repository.getUser(userId);
   }
   
@@ -13,8 +13,9 @@ class AuthenticationUseCase {
     return await _repository.login(email, password);
   }
 
-  Future<bool> signUp(String email, String name, String password) async =>
+  Future<User?> signUp(String email, String name, String password) async =>
       await _repository.signUp(User(email: email, name: name, password: password));
-
+      
+      
   Future<bool> logOut() async => await _repository.logOut();
 }
