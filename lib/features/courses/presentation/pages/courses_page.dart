@@ -7,6 +7,7 @@ import '../widgets/course_form_dialog.dart';
 import '../controller/course_controller.dart';
 import '../../../RegToCourse/presentation/controller/user_course_controller.dart';
 import '../../../auth/presentation/controller/auth_controller.dart';
+import '../../../auth/presentation/pages/login_page.dart';
 import 'courseDetail_page.dart';
 
 class CourseDashboard extends StatefulWidget {
@@ -23,7 +24,6 @@ class _CourseDashboardState extends State<CourseDashboard>
   late final UserCourseController userCourseController;
   String? copiedCode;
   final RxList<Course> _enrolledCourses = <Course>[].obs;
-  // Por ahora asumimos role de teacher, esto debería venir del auth
   String userRole = "teacher";
 
   @override
@@ -98,111 +98,112 @@ class _CourseDashboardState extends State<CourseDashboard>
   void _showJoinCourseDialog() {
     final codeController = TextEditingController();
     Get.dialog(
-    AlertDialog(
-      title: const Text('Unirse al Curso'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Ingresa el código de invitación proporcionado por tu profesor.',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: codeController,
-            decoration: const InputDecoration(
-              labelText: 'Código de Invitación',
-              hintText: 'ej. WEB401-2024',
-              border: OutlineInputBorder(),
+      AlertDialog(
+        title: const Text('Unirse al Curso'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Ingresa el código de invitación proporcionado por tu profesor.',
+              style: TextStyle(color: Colors.grey),
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeController,
+              decoration: const InputDecoration(
+                labelText: 'Código de Invitación',
+                hintText: 'ej. WEB401-2024',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final enteredCode = codeController.text.trim();
+
+              if (enteredCode.isEmpty) {
+                Get.snackbar(
+                  "Error",
+                  "Debes ingresar un código válido",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+                return;
+              }
+
+              // 1️⃣ Buscar el ID del curso por código
+              final courseId = await courseController.getCourseIdByCode(
+                enteredCode,
+              );
+
+              if (courseId == null) {
+                Get.snackbar(
+                  "No encontrado",
+                  "No existe un curso con ese código",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+                return;
+              }
+
+              // 2️⃣ Obtener usuario actual
+              final auth = Get.find<AuthenticationController>();
+              final userId = auth.currentUser.value?.id;
+
+              if (userId == null) {
+                Get.snackbar(
+                  "Error",
+                  "Debes iniciar sesión para unirte",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+                return;
+              }
+
+              try {
+                // 3️⃣ Inscribir usuario en el curso
+                await userCourseController.enrollUser(userId, courseId);
+
+                // 4️⃣ Refrescar cursos inscritos
+                await userCourseController.fetchUserCourses(userId);
+                final enrolled = await courseController.loadCoursesByIds(
+                  userCourseController.userCourses,
+                );
+                _enrolledCourses.assignAll(enrolled);
+
+                Get.back();
+                Get.snackbar(
+                  "¡Éxito!",
+                  "Te has inscrito en el curso",
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.green[100],
+                  colorText: Colors.green[800],
+                );
+              } catch (e) {
+                Get.snackbar(
+                  "Error",
+                  e.toString(),
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red[100],
+                  colorText: Colors.red[800],
+                );
+              }
+            },
+            child: const Text('Unirse al Curso'),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            final enteredCode = codeController.text.trim();
-
-            if (enteredCode.isEmpty) {
-              Get.snackbar(
-                "Error",
-                "Debes ingresar un código válido",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
-              );
-              return;
-            }
-
-            // 1️⃣ Buscar el ID del curso por código
-            final courseId =
-                await courseController.getCourseIdByCode(enteredCode);
-
-            if (courseId == null) {
-              Get.snackbar(
-                "No encontrado",
-                "No existe un curso con ese código",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
-              );
-              return;
-            }
-
-            // 2️⃣ Obtener usuario actual
-            final auth = Get.find<AuthenticationController>();
-            final userId = auth.currentUser.value?.id;
-
-            if (userId == null) {
-              Get.snackbar(
-                "Error",
-                "Debes iniciar sesión para unirte",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
-              );
-              return;
-            }
-
-            try {
-              // 3️⃣ Inscribir usuario en el curso
-              await userCourseController.enrollUser(userId, courseId);
-
-              // 4️⃣ Refrescar cursos inscritos
-              await userCourseController.fetchUserCourses(userId);
-              final enrolled = await courseController.loadCoursesByIds(
-                userCourseController.userCourses,
-              );
-              _enrolledCourses.assignAll(enrolled);
-
-              Get.back();
-              Get.snackbar(
-                "¡Éxito!",
-                "Te has inscrito en el curso",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green[100],
-                colorText: Colors.green[800],
-              );
-            } catch (e) {
-              Get.snackbar(
-                "Error",
-                e.toString(),
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
-              );
-            }
-          },
-          child: const Text('Unirse al Curso'),
-        ),
-      ],
-    ),
-  );
+    );
   }
 
   Future<void> _createCourse() async {
@@ -348,12 +349,23 @@ class _CourseDashboardState extends State<CourseDashboard>
         actions: [
           OutlinedButton.icon(
             onPressed: () {
-              // Navegación a ajustes, falta por implementar
+              final auth = Get.find<AuthenticationController>();
+              auth.logOut();
+
+              // 🔹 Redirige al Login limpiando navegación previa
+              Get.offAll(() => const LoginPage());
             },
-            icon: const Icon(Icons.settings, size: 16),
-            label: const Text('Ajustes'),
-            style: OutlinedButton.styleFrom(foregroundColor: Colors.grey[700]),
+            icon: const Icon(Icons.logout, size: 16, color: Colors.red),
+            label: const Text(
+              'Salir',
+              style: TextStyle(color: Colors.red),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+            ),
           ),
+
           const SizedBox(width: 16),
         ],
         bottom: TabBar(

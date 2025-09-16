@@ -29,7 +29,7 @@ import 'features/auth/data/datasources/i_auth_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_usecase.dart';
 import 'features/auth/presentation/controller/auth_controller.dart';
-import 'features/auth/presentation/pages/loginScreen.dart';
+import 'features/auth/presentation/pages/login_page.dart';
 
 
 void main() async {
@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const LoginScreen(),
+      home: const LoginPage(),
     );
   }
 }
