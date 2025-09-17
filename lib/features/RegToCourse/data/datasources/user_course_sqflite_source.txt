@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import '../../../../core/app_database.dart';
-import 'i_user_course_source.dart';
+import 'i_user_course_source.txt';
 
 class UserCourseSqfliteSource implements IUserCourseSource {
   Future<Database> get db async => await AppDatabase.instance;

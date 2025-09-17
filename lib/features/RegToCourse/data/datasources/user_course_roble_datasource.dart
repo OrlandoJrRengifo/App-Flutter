@@ -17,6 +17,7 @@ class UserCourseRobleDataSource implements IUserCourseRobleDataSource {
 
   @override
   Future<void> enrollUser(String userId, String courseId) async {
+    print("enreoll Inscribiendo usuario $userId en curso $courseId");
     final body = {
       "tableName": "user_courses",
       "records": [
@@ -42,11 +43,14 @@ class UserCourseRobleDataSource implements IUserCourseRobleDataSource {
     logInfo("📡 EnrollUser → status: ${response.statusCode}");
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception("❌ Error inscribiendo usuario: ${response.body}");
+    } else {
+      print("Usuario inscrito correctamente: $userId en curso $courseId");
     }
   }
 
   @override
   Future<List<String>> getUserCourses(String userId) async {
+    print("entro a getusercouse userId: $userId");
     final uri = Uri.parse("$baseUrl/read").replace(
       queryParameters: {
         "tableName": "user_courses",

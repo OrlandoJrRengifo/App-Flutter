@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
 import '../models/course_model.dart';
-import '../../../auth/data/datasources/auth_roble_datasource.dart';
 import 'i_course_roble_datasource.dart';
 
 class CourseRobleDataSource implements ICourseRobleDataSource {
@@ -15,13 +14,14 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
   final String baseUrl =
       'https://roble-api.openlab.uninorte.edu.co/database/database_364931dc19';
 
-
   CourseRobleDataSource({http.Client? client})
     : httpClient = client ?? http.Client();
 
   @override
   Future<CourseModel> create(CourseModel course) async {
-    print(  "Creando curso: ${course.name}, Teacher ID: ${course.teacherId}, Max Students: ${course.maxStudents}"  );
+    print(
+      "Creando curso: ${course.name}, Teacher ID: ${course.teacherId}, Max Students: ${course.maxStudents}",
+    );
     final body = {
       "tableName": "courses",
       "records": [
@@ -57,6 +57,7 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
 
   @override
   Future<CourseModel?> getById(String id) async {
+    print(  "Obteniendo curso por ID: $id");
     final uri = Uri.parse(
       "$baseUrl/read",
     ).replace(queryParameters: {"tableName": "courses", "_id": id});
@@ -178,22 +179,32 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
     }
   }
 
-   @override
+  @override
   Future<CourseModel?> getByCode(String code) async {
-   /* final db = await _db;
+    final uri = Uri.parse(
+      "$baseUrl/read",
+    ).replace(queryParameters: {"tableName": "courses", "code": code});
 
-    final maps = await db.query(
-      'courses',
-      where: 'code = ?',
-      whereArgs: [code],
-      limit: 1,
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
+    final response = await httpClient.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token'},
     );
-    if (maps.isEmpty) {
-      print("⚠️ No se encontró curso con code=$code");
-      return null;
+
+    logInfo("📡 GetByCode → status: ${response.statusCode}");
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = jsonDecode(response.body) as List;
+      if (data.isNotEmpty) {
+        logInfo("📌 Curso encontrado por code=$code → ${data.first}");
+        return CourseModel.fromMap(data.first);
+      } else {
+        logWarning("⚠️ No se encontró curso con code=$code");
+      }
+    } else {
+      logError("❌ Error en GetByCode: ${response.body}");
     }
-    print("📌 Curso encontrado por code=$code → ${maps.first}");
-    return CourseModel.fromMap(maps.first);
-    */
+    return null;
   }
 }
