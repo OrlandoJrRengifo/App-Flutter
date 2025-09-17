@@ -1,20 +1,20 @@
 import '../../domain/repositories/i_user_course_repository.dart';
-import '../datasources/i_user_course_source.dart';
+import '../datasources/i_user_course_roble_datasource.dart';
 
 class UserCourseRepository implements IUserCourseRepository {
-  final IUserCourseSource localDataSource;
+  final IUserCourseRobleDataSource robleDataSource;
 
-  UserCourseRepository(this.localDataSource);
+  UserCourseRepository(this.robleDataSource);
 
   @override
   Future<void> enrollUser(String userId, String courseId) =>
-      localDataSource.enrollUser(userId, courseId);
+      robleDataSource.enrollUser(userId, courseId);
 
   @override
   Future<List<String>> getUserCourses(String userId) =>
-      localDataSource.getUserCourses(userId);
+      robleDataSource.getUserCourses(userId);
 
   @override
   Future<List<String>> getCourseUsers(String courseId) =>
-      localDataSource.getCourseUsers(courseId);
+      robleDataSource.getCourseUsers(courseId);
 }
