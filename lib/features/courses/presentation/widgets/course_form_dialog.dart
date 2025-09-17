@@ -6,7 +6,7 @@ import '../../domain/entities/course.dart';
 class CourseFormDialog extends StatefulWidget {
   final Course? course;
   
-  const CourseFormDialog({this.course, Key? key}) : super(key: key);
+  const CourseFormDialog({this.course, super.key});
 
   @override
   _CourseFormDialogState createState() => _CourseFormDialogState();

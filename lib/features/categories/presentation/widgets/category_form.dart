@@ -10,8 +10,8 @@ class CategoryFormDialog extends StatefulWidget {
   const CategoryFormDialog({
     this.category, 
     required this.courseId, 
-    Key? key
-  }) : super(key: key);
+    super.key
+  });
 
   @override
   _CategoryFormDialogState createState() => _CategoryFormDialogState();

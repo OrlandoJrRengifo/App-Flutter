@@ -2,20 +2,13 @@ import '../../domain/entities/course.dart';
 
 class CourseModel extends Course {
   CourseModel({
-    String? id,
-    required String name,
-    required String code,
-    required String teacherId,
-    required int maxStudents,
-    DateTime? createdAt,
-  }) : super(
-         id: id,
-         name: name,
-         code: code,
-         teacherId: teacherId,
-         maxStudents: maxStudents,
-         createdAt: createdAt,
-       );
+    super.id,
+    required super.name,
+    required super.code,
+    required super.teacherId,
+    required super.maxStudents,
+    super.createdAt,
+  });
 
   factory CourseModel.fromMap(Map<String, dynamic> m) {
     return CourseModel(
@@ -43,6 +36,7 @@ class CourseModel extends Course {
     return map;
   }
 
+  @override
   CourseModel copyWith({
     String? id,
     String? name,

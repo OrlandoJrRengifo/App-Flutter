@@ -13,7 +13,7 @@ import '../../../auth/presentation/pages/login_page.dart';
 import 'courseDetail_page.dart';
 
 class CourseDashboard extends StatefulWidget {
-  const CourseDashboard({Key? key}) : super(key: key);
+  const CourseDashboard({super.key});
 
   @override
   State<CourseDashboard> createState() => _CourseDashboardState();
@@ -49,6 +49,7 @@ class _CourseDashboardState extends State<CourseDashboard>
       final userId = auth.currentUser.value?.id;
       if (userId != null) {
         // Cargar IDs de cursos inscritos
+        print("entro a initstate userId: $userId");
         await userCourseController.fetchUserCourses(userId);
 
         // 🔹 Ahora traemos los cursos completos con esos IDs
@@ -70,7 +71,7 @@ class _CourseDashboardState extends State<CourseDashboard>
 
   String _generateInviteCode(Course course) {
     // Generar código de invitación basado en el código del curso
-    return "${course.code}-2024";
+    return course.code;
   }
 
   void _copyInviteCode(String code) {
@@ -174,6 +175,7 @@ class _CourseDashboardState extends State<CourseDashboard>
 
               try {
                 // 3️⃣ Inscribir usuario en el curso
+                print("entro a meter el usuario: $userId en curso: $courseId");
                 await userCourseController.enrollUser(userId, courseId);
 
                 // 4️⃣ Refrescar cursos inscritos

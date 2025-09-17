@@ -2,20 +2,13 @@ import '../../domain/entities/category.dart';
 
 class CategoryModel extends Category {
   CategoryModel({
-    String? id,
-    required String courseId,
-    required String name,
-    required GroupingMethod groupingMethod,
-    int? maxGroupSize,
-    DateTime? createdAt,
-  }) : super(
-          id: id,
-          courseId: courseId,
-          name: name,
-          groupingMethod: groupingMethod,
-          maxGroupSize: maxGroupSize,
-          createdAt: createdAt,
-        );
+    super.id,
+    required super.courseId,
+    required super.name,
+    required super.groupingMethod,
+    super.maxGroupSize,
+    super.createdAt,
+  });
 
   factory CategoryModel.fromMap(Map<String, dynamic> m) {
     final idValue = m['id'];
@@ -74,6 +67,7 @@ class CategoryModel extends Category {
     return map;
   }
 
+  @override
   CategoryModel copyWith({
     String? id,
     String? courseId,
