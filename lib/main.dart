@@ -21,12 +21,12 @@ import 'features/courses/presentation/controller/course_controller.dart';
 // Inscripciones
 import 'features/RegToCourse/domain/repositories/i_user_course_repository.dart';
 import 'features/RegToCourse/domain/usecases/user_course_usecase.dart';
-import 'features/RegToCourse/data/datasources/i_user_course_source.dart';
-import 'features/RegToCourse/data/datasources/user_course_sqflite_source.dart';
+import 'features/RegToCourse/data/datasources/i_user_course_roble_datasource.dart';
+import 'features/RegToCourse/data/datasources/user_course_roble_datasource.dart';
 import 'features/RegToCourse/data/repositories/user_course_repository.dart';
 import 'features/RegToCourse/presentation/controller/user_course_controller.dart';
+
 // ==================== Autenticación ====================
-//import 'features/auth/data/datasources/auth_sqflite_source.txt'; //borrar despues
 import 'features/auth/data/datasources/auth_roble_datasource.dart';
 import 'features/auth/data/datasources/i_auth_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
@@ -42,7 +42,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppDatabase.instance;
 
-  // implementación SharedPreferences
+  // implementación SharedPreferences para el token
   Get.put<ILocalPreferences>(LocalPreferencesShared(), permanent: true);
 
   // ==================== Autenticación ====================
@@ -67,7 +67,7 @@ void main() async {
   Get.put(CoursesController(useCases: Get.find()), permanent: true);
 
   // ==================== Inscripciones ====================
-  Get.lazyPut<IUserCourseSource>(() => UserCourseSqfliteSource(), fenix: true);
+  Get.lazyPut<IUserCourseRobleDataSource>(() => UserCourseRobleDataSource(), fenix: true);
   Get.lazyPut<IUserCourseRepository>(() => UserCourseRepository(Get.find()), fenix: true);
   Get.lazyPut(() => UserCourseUseCase(Get.find()), fenix: true);
   Get.put(UserCourseController(Get.find()), permanent: true);
