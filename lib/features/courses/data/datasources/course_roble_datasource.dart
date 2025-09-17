@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:get/get.dart';
+import '../../../../core/i_local_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
@@ -7,16 +9,14 @@ import '../../../auth/data/datasources/auth_roble_datasource.dart';
 import 'i_course_roble_datasource.dart';
 
 class CourseRobleDataSource implements ICourseRobleDataSource {
-  final AuthRobleSource authSource;
   final http.Client httpClient;
 
   // Url de Roble
   final String baseUrl =
       'https://roble-api.openlab.uninorte.edu.co/database/database_364931dc19';
 
-  String? get token => authSource.accessToken;
 
-  CourseRobleDataSource({required this.authSource, http.Client? client})
+  CourseRobleDataSource({http.Client? client})
     : httpClient = client ?? http.Client();
 
   @override
@@ -34,6 +34,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
         },
       ],
     };
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
 
     final response = await httpClient.post(
       Uri.parse("$baseUrl/insert"),
@@ -59,6 +61,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
       "$baseUrl/read",
     ).replace(queryParameters: {"tableName": "courses", "_id": id});
 
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     final response = await httpClient.get(
       uri,
       headers: {'Authorization': 'Bearer $token'},
@@ -79,6 +83,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
       queryParameters: {"tableName": "courses", "teacher_id": teacherId},
     );
 
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     final response = await httpClient.get(
       uri,
       headers: {'Authorization': 'Bearer $token'},
@@ -109,7 +115,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
         "max_students": course.maxStudents,
       },
     };
-
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     final response = await httpClient.put(
       Uri.parse("$baseUrl/update"),
       headers: {
@@ -134,7 +141,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
     final uri = Uri.parse('$baseUrl/read').replace(
       queryParameters: {'tableName': 'courses', 'teacher_id': teacherId},
     );
-
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     final response = await httpClient.get(
       uri,
       headers: {'Authorization': 'Bearer $token'},
@@ -153,7 +161,8 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
   @override
   Future<void> delete(String id) async {
     final body = {"tableName": "courses", "idColumn": "_id", "idValue": id};
-
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
     final response = await httpClient.delete(
       Uri.parse("$baseUrl/delete"),
       headers: {

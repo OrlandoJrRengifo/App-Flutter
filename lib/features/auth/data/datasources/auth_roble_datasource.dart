@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
+import 'package:get/get.dart';
 
+import '../../../../../core/i_local_preferences.dart';
 import '../../domain/entities/user.dart';
 //import '../../../courses/data/datasources/course_roble_datasource.dart';
 import 'i_auth_source.dart';
@@ -14,9 +16,6 @@ class AuthRobleSource implements IAuthenticationSource {
 
   String? _accessToken;
   String? _refreshToken;
-
-  /// Getter público para que otros puedan usar el token
-  String? get accessToken => _accessToken;
 
   AuthRobleSource({http.Client? client}) : httpClient = client ?? http.Client();
 
@@ -54,6 +53,11 @@ class AuthRobleSource implements IAuthenticationSource {
       final data = jsonDecode(response.body);
       _accessToken = data['accessToken'];
       _refreshToken = data['refreshToken'];
+      final ILocalPreferences sharedPreferences = Get.find();
+      sharedPreferences.storeData('token', _accessToken);
+      sharedPreferences.storeData('refreshToken', _refreshToken);
+      logInfo("Token: $_accessToken"
+          "\nRefresh Token: $refreshToken");
       return User.fromJson(data['user']);
     } else {
       final body = jsonDecode(response.body);

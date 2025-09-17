@@ -37,16 +37,18 @@ import 'features/auth/presentation/controller/auth_controller.dart';
 import 'features/auth/presentation/pages/loginScreen.dart';
 
 
+import 'core/i_local_preferences.dart';
+import 'core/local_preferences_shared.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppDatabase.instance;
 
-  // ==================== Autenticación ====================
-  // Creamos la instancia de AuthRobleSource
-  final authSource = AuthRobleSource();
+  // implementación SharedPreferences
+  Get.put<ILocalPreferences>(LocalPreferencesShared(), permanent: true);
 
-  // Registramos AuthRobleSource en GetX
-  Get.put<IAuthenticationSource>(authSource, permanent: true);
+  // ==================== Autenticación ====================
+  Get.put<IAuthenticationSource>(AuthRobleSource(), permanent: true);
   Get.put(AuthRepository(Get.find<IAuthenticationSource>()), permanent: true);
   Get.put(AuthenticationUseCase(Get.find<AuthRepository>()), permanent: true);
   Get.put(AuthenticationController(Get.find<AuthenticationUseCase>()), permanent: true);
@@ -58,9 +60,8 @@ void main() async {
   Get.put(CategoriesController(useCases: Get.find()), permanent: true);
 
   // ==================== Cursos ====================
-  // Registramos CourseRobleDataSource pasándole la dependencia de AuthRobleSource
   Get.lazyPut<ICourseRobleDataSource>(
-    () => CourseRobleDataSource(authSource: authSource),
+    () => CourseRobleDataSource(),
     fenix: true,
   );
   Get.lazyPut<ICourseRepository>(() => CourseRepository(Get.find()), fenix: true);
@@ -75,7 +76,6 @@ void main() async {
 
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
