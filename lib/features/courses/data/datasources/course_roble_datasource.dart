@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
 import '../models/course_model.dart';
-import '../../../auth/data/datasources/auth_roble_datasource.dart';
 import 'i_course_roble_datasource.dart';
 
 class CourseRobleDataSource implements ICourseRobleDataSource {
