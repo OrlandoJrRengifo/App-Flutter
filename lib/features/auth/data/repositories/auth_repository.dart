@@ -19,7 +19,7 @@ class AuthRepository implements IAuthRepository {
   }
 
   @override
-  Future<User?> signUp(User user) async => await authenticationSource.signUp(user);
+  Future<bool> signUp(User user) async => await authenticationSource.signUp(user);
 
   @override
   Future<bool> logOut() async => await authenticationSource.logOut();

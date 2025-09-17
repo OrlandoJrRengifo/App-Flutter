@@ -13,7 +13,7 @@ class AuthenticationUseCase {
     return await _repository.login(email, password);
   }
 
-  Future<User?> signUp(String email, String name, String password) async =>
+  Future<bool> signUp(String email, String name, String password) async =>
       await _repository.signUp(User(email: email, name: name, password: password));
       
       

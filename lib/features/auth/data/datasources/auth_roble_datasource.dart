@@ -44,21 +44,11 @@ class AuthRobleSource implements IAuthenticationSource {
 
   @override
   Future<User?> login(String email, String password) async {
-    print(">>> Entré a login con $email");
-
     final response = await httpClient.post(
       Uri.parse("$baseUrl/login"),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({"email": email, "password": password}),
     );
-
-    print(">>> Llamada a login terminada, status: ${response.statusCode}");
-    print(">>> Respuesta cruda: ${response.body}");
-
-    logInfo("Login status: ${response.statusCode}");
-
-    // 👇 agrega este print
-    log("Login response body: ${response.body}");
 
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
@@ -73,23 +63,20 @@ class AuthRobleSource implements IAuthenticationSource {
   }
 
   @override
-  Future<User?> signUp(User user) async {
+  Future<bool> signUp(User user) async {
     final response = await httpClient.post(
-      Uri.parse("$baseUrl/users/insert"),
+      Uri.parse("$baseUrl/signup-direct"),
       headers: {'Content-Type': 'application/json; charset=UTF-8'},
       body: jsonEncode({
-        "tableName": "users",
-        "records": [user.toJson()],
+        "email": user.email,
+        "password": user.password,
+        "name": user.name,
       }),
     );
-
-    if (response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      final insertedUser = data['inserted'][0];
-      return User.fromJson(insertedUser);
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return true;
     }
-
-    return null;
+    return false;
   }
 
   @override
