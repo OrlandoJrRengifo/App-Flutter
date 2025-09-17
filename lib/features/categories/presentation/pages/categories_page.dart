@@ -4,14 +4,14 @@ import 'package:get/get.dart';
 import '../../domain/entities/category.dart';
 import '../../controllers/categories_controller.dart';
 import '../widgets/category_form.dart';
+import '../../../groups/presentation/pages/group_page.dart';
+import '../../../groups/presentation/controller/group_controller.dart';
+import '../../../RegToCourse/domain/usecases/user_course_usecase.dart';
 
 class CategoriesPage extends StatefulWidget {
   final int courseId;
 
-  const CategoriesPage({
-    super.key,
-    required this.courseId,
-  });
+  const CategoriesPage({super.key, required this.courseId});
 
   @override
   State<CategoriesPage> createState() => _CategoriesPageState();
@@ -19,11 +19,15 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   late final CategoriesController controller;
+  late final GroupController groupController;
+  late final UserCourseUseCase userCourseUseCase;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<CategoriesController>();
+    groupController = Get.find<GroupController>(); // 👈
+    userCourseUseCase = Get.find<UserCourseUseCase>(); // 👈
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.loadCategories(widget.courseId);
@@ -175,11 +179,19 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ],
                 ),
                 onTap: () {
-                  Get.snackbar(
-                    "Información",
-                    "Tap en '${cat.name}' - ID: ${cat.id}",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  if (cat.id != null) {
+                    Get.to(
+                      () => GroupPage(
+                        categoryId: cat.id!,
+                        categoryName: cat.name,
+                      ),
+                    );
+                  } else {
+                    Get.snackbar(
+                      "Error",
+                      "La categoría aún no tiene ID asignado",
+                    );
+                  }
                 },
               ),
             );
@@ -194,12 +206,28 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
           if (result != null) {
             try {
-              await controller.addCategory(
+              final newCategory = await controller.addCategory(
                 courseId: result.courseId,
                 name: result.name,
                 groupingMethod: result.groupingMethod,
                 maxMembers: result.maxGroupSize ?? 1,
               );
+
+              if (newCategory != null && newCategory.id != null) {
+                // 🔥 Crear grupos automáticos aquí
+                final enrolledUsers =
+                    await userCourseUseCase.getCourseUsers(widget.courseId);
+                final numStudents = enrolledUsers.length;
+                final numGroups = (numStudents / (result.maxGroupSize ?? 1)).ceil();
+
+                for (int i = 1; i <= numGroups; i++) {
+                  await groupController.createGroup(
+                    newCategory.id!,
+                    i,
+                    result.maxGroupSize ?? 1,
+                  );
+                }
+              }
 
               Get.snackbar(
                 "¡Éxito!",

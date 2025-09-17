@@ -49,7 +49,16 @@ class AppDatabase {
             createdAt TEXT DEFAULT (datetime('now'))
           )
         ''');
-
+        // Tabla de grupos
+        await db.execute('''
+          CREATE TABLE groups(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category_id INTEGER NOT NULL,
+            identifier_number INTEGER NOT NULL,
+            max_members INTEGER NOT NULL,
+            created_at TEXT DEFAULT (datetime('now'))
+          )
+        ''');
         // Tabla intermedia usuario ↔ curso
         await db.execute('''
           CREATE TABLE user_courses(
@@ -65,7 +74,9 @@ class AppDatabase {
         final users = [
           {"id": 1, "name": "Amanda Álvarez", "email": "a@a.com", "password": "123456"},
           {"id": 2, "name": "Brayan Aguirre", "email": "b@a.com", "password": "123456"},
-          {"id": 3, "name": "Carlos Acevedo", "email": "c@a.com", "password": "123456"}
+          {"id": 3, "name": "Carlos Acevedo", "email": "c@a.com", "password": "123456"},
+          {"id": 4, "name": "Daniela Alarcón", "email": "d@a.com", "password": "123456"},
+          {"id": 5, "name": "Efrain Amador", "email": "e@a.com", "password": "123456"}
         ];
         for (var user in users) {
           await db.insert("users", user, conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -83,6 +94,8 @@ class AppDatabase {
         await db.insert("courses", course, conflictAlgorithm: ConflictAlgorithm.ignore);
 
         await db.insert("user_courses", {"user_id": 2, "course_id": 1},
+            conflictAlgorithm: ConflictAlgorithm.ignore);
+        await db.insert("user_courses", {"user_id": 3, "course_id": 1},
             conflictAlgorithm: ConflictAlgorithm.ignore);
       },
     );
