@@ -44,11 +44,11 @@ class AuthenticationController extends GetxController {
 
     final user = await _authUseCase.signUp(email, name, password);
 
-    if (user != null) {
-      currentUser.value = user; // ahora sí contiene el id de Roble
-      return true;
-    }
-    return false;
+    //if (user != null) {
+      //currentUser.value = user; // ahora sí contiene el id de Roble
+      return user;
+    //}
+    //return false;
   }
 
   Future<void> logOut() async {
