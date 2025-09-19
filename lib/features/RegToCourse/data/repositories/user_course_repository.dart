@@ -7,7 +7,7 @@ class UserCourseRepository implements IUserCourseRepository {
   UserCourseRepository(this.robleDataSource);
 
   @override
-  Future<void> enrollUser(String userId, String courseId) =>
+  Future<bool> enrollUser(String userId, String courseId) =>
       robleDataSource.enrollUser(userId, courseId);
 
   @override

@@ -175,24 +175,36 @@ class _CourseDashboardState extends State<CourseDashboard>
 
               try {
                 // 3️⃣ Inscribir usuario en el curso
-                print("entro a meter el usuario: $userId en curso: $courseId");
-                await userCourseController.enrollUser(userId, courseId);
-
-                // 4️⃣ Refrescar cursos inscritos
-                await userCourseController.fetchUserCourses(userId);
-                final enrolled = await courseController.loadCoursesByIds(
-                  userCourseController.userCourses,
+                final success = await userCourseController.enrollUser(
+                  userId,
+                  courseId,
                 );
-                _enrolledCourses.assignAll(enrolled);
 
-                Get.back();
-                Get.snackbar(
-                  "¡Éxito!",
-                  "Te has inscrito en el curso",
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.green[100],
-                  colorText: Colors.green[800],
-                );
+                if (success) {
+                  // 4️⃣ Refrescar cursos inscritos
+                  await userCourseController.fetchUserCourses(userId);
+                  final enrolled = await courseController.loadCoursesByIds(
+                    userCourseController.userCourses,
+                  );
+                  _enrolledCourses.assignAll(enrolled);
+
+                  Get.back();
+                  Get.snackbar(
+                    "¡Éxito!",
+                    "Te has inscrito en el curso",
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green[100],
+                    colorText: Colors.green[800],
+                  );
+                } else {
+                  Get.snackbar(
+                    "Error",
+                    "No se pudo inscribir al curso. Intenta nuevamente.",
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.red[100],
+                    colorText: Colors.red[800],
+                  );
+                }
               } catch (e) {
                 Get.snackbar(
                   "Error",
@@ -359,10 +371,7 @@ class _CourseDashboardState extends State<CourseDashboard>
               Get.offAll(() => const LoginPage());
             },
             icon: const Icon(Icons.logout, size: 16, color: Colors.red),
-            label: const Text(
-              'Salir',
-              style: TextStyle(color: Colors.red),
-            ),
+            label: const Text('Salir', style: TextStyle(color: Colors.red)),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.red,
               side: const BorderSide(color: Colors.red),
@@ -552,8 +561,10 @@ class _CourseDashboardState extends State<CourseDashboard>
       child: InkWell(
         onTap: () {
           Get.to(
-            () =>
-                CourseDetailPage(courseId: course.id ?? "", courseName: course.name),
+            () => CourseDetailPage(
+              courseId: course.id ?? "",
+              courseName: course.name,
+            ),
             transition: Transition.rightToLeft,
           );
         },

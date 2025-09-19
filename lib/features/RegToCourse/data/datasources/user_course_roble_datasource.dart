@@ -16,8 +16,7 @@ class UserCourseRobleDataSource implements IUserCourseRobleDataSource {
       : httpClient = client ?? http.Client();
 
   @override
-  Future<void> enrollUser(String userId, String courseId) async {
-    print("enreoll Inscribiendo usuario $userId en curso $courseId");
+  Future<bool> enrollUser(String userId, String courseId) async {
     final body = {
       "tableName": "user_courses",
       "records": [
@@ -39,13 +38,10 @@ class UserCourseRobleDataSource implements IUserCourseRobleDataSource {
       },
       body: jsonEncode(body),
     );
-
-    logInfo("📡 EnrollUser → status: ${response.statusCode}");
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception("❌ Error inscribiendo usuario: ${response.body}");
-    } else {
-      print("Usuario inscrito correctamente: $userId en curso $courseId");
+      return false;
     }
+      return true;
   }
 
   @override
