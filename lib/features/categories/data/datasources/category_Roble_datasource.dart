@@ -1,89 +1,172 @@
 import 'dart:convert';
+import 'package:get/get.dart';
+import '../../../../core/i_local_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../models/category_model.dart';
-import 'i_category_local_datasource.dart';
+import 'package:loggy/loggy.dart';
 
-class CategoryRobleDataSource implements ICategoryLocalDataSource {
+import '../models/category_model.dart';
+import 'i_category_Roble_datasource.dart';
+import '../../domain/entities/category.dart';
+
+class CategoryRobleDataSource implements ICategoryRobleDataSource {
   final http.Client httpClient;
   final String baseUrl =
-      "https://roble-api.openlab.uninorte.edu.co/database_364931dc19";
-      // cambiar por la que tira Roble
+      'https://roble-api.openlab.uninorte.edu.co/database/database_364931dc19';
 
   CategoryRobleDataSource({http.Client? client})
       : httpClient = client ?? http.Client();
 
   @override
   Future<CategoryModel> create(CategoryModel category) async {
-    // todo depende de como lo reciba roble, en todas las llamadas
+    print("entro a create datasource");
+    final body = {
+      "tableName": "categories",
+      "records": [
+        {
+          "course_id": category.courseId,
+          "name": category.name,
+          "grouping_method": category.groupingMethod == GroupingMethod.random
+              ? "random"
+              : "self_assigned",
+          "max_group_size": category.maxGroupSize,
+          "created_at": category.createdAt?.toIso8601String(),
+        }
+      ]
+    };
+
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
     final response = await httpClient.post(
-      Uri.parse("$baseUrl/categories"),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(category.toMap()),
+      Uri.parse("$baseUrl/insert"),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(body),
     );
-
-    if (response.statusCode == 201) {
+    
+    print("📡 Crear categoría → status: ${response.statusCode}");
+    print(response.body);
+    if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-      return CategoryModel.fromMap(data);
+      final inserted = (data['inserted'] as List).first;
+      return CategoryModel.fromMap(inserted);
     } else {
-      throw Exception("Error al crear categoría: ${response.body}");
-    }
-  }
-
-  @override
-  Future<void> delete(String id) async {
-    final response =
-        await httpClient.delete(Uri.parse("$baseUrl/categories/$id"));
-
-    if (response.statusCode != 204) {
-      throw Exception("Error al eliminar categoría: ${response.body}");
+      throw Exception("❌ Error al crear categoría: ${response.body}");
     }
   }
 
   @override
   Future<CategoryModel?> getById(String id) async {
-    final response =
-        await httpClient.get(Uri.parse("$baseUrl/categories/$id"));
+    final uri = Uri.parse("$baseUrl/read").replace(
+      queryParameters: {"tableName": "categories", "_id": id},
+    );
+
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
+    final response = await httpClient.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token'},
+    );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return CategoryModel.fromMap(data);
-    } else if (response.statusCode == 404) {
-      return null;
-    } else {
-      throw Exception("Error al obtener categoría: ${response.body}");
+      final data = jsonDecode(response.body) as List;
+      if (data.isNotEmpty) {
+        return CategoryModel.fromMap(data.first);
+      }
     }
+    return null;
   }
 
   @override
   Future<List<CategoryModel>> listByCourse(String courseId) async {
-    final response =
-        await httpClient.get(Uri.parse("$baseUrl/courses/$courseId/categories"));
+    final uri = Uri.parse("$baseUrl/read").replace(
+      queryParameters: {"tableName": "categories", "course_id": courseId},
+    );
 
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
+    final response = await httpClient.get(
+      uri,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    logInfo("📡 ListByCourse categorías → status: ${response.statusCode}");
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as List;
       return data.map((m) => CategoryModel.fromMap(m)).toList();
     } else {
-      throw Exception("Error al listar categorías: ${response.body}");
+      throw Exception("❌ Error listando categorías: ${response.body}");
     }
   }
 
   @override
   Future<CategoryModel> update(CategoryModel category) async {
+    print("entro a update datasource roble: ${category.id}");
     if (category.id == null) {
-      throw Exception("Se requiere el id de la categoría para actualizar");
+      throw Exception("❌ Se requiere ID para actualizar categoría");
     }
 
+    final body = {
+      "tableName": "categories",
+      "idColumn": "_id",
+      "idValue": category.id,
+      "updates": {
+        "course_id": category.courseId,
+        "name": category.name,
+        "grouping_method": category.groupingMethod == GroupingMethod.random
+            ? "random"
+            : "self_assigned",
+        "max_group_size": category.maxGroupSize,
+      },
+    };
+
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
     final response = await httpClient.put(
-      Uri.parse("$baseUrl/categories/${category.id}"),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(category.toMap()),
+      Uri.parse("$baseUrl/update"),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(body),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return CategoryModel.fromMap(data);
     } else {
-      throw Exception("Error al actualizar categoría: ${response.body}");
+      throw Exception("❌ Error al actualizar categoría: ${response.body}");
+    }
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    final body = {
+      "tableName": "categories",
+      "idColumn": "_id",
+      "idValue": id,
+    };
+
+    final ILocalPreferences sharedPreferences = Get.find();
+    final token = await sharedPreferences.retrieveData<String>('token');
+
+    final response = await httpClient.delete(
+      Uri.parse("$baseUrl/delete"),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(body),
+    );
+
+    logInfo("📡 Eliminar categoría → status: ${response.statusCode}");
+    if (response.statusCode != 200) {
+      throw Exception("❌ Error al eliminar categoría: ${response.body}");
     }
   }
 }

@@ -137,7 +137,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             category: cat,
                           ),
                         );
-
+                        print("entro a update datasource: ${widget.courseId}");
+                        print("entro a update datasource de cat: ${cat.name}");
                         if (result != null) {
                           await controller.updateCategoryInList(result);
                         }

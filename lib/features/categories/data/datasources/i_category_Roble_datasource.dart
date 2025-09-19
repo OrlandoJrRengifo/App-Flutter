@@ -1,6 +1,6 @@
 import '../models/category_model.dart';
 
-abstract class ICategoryLocalDataSource {
+abstract class ICategoryRobleDataSource {
   Future<CategoryModel> create(CategoryModel category);
   Future<CategoryModel?> getById(String id);
   Future<List<CategoryModel>> listByCourse(String courseId);
