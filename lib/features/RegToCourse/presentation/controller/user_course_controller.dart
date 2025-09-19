@@ -9,8 +9,8 @@ class UserCourseController extends GetxController {
   final RxList<String> userCourses = <String>[].obs;
   final RxList<String> courseUsers = <String>[].obs;
 
-  Future<void> enrollUser(String userId, String courseId) async {
-    await useCase.enrollUser(userId, courseId);
+  Future<bool> enrollUser(String userId, String courseId) async {
+    return await useCase.enrollUser(userId, courseId);
   }
 
   Future<void> fetchUserCourses(String userId) async {

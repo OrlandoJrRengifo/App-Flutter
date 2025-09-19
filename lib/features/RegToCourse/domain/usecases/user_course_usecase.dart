@@ -5,7 +5,7 @@ class UserCourseUseCase {
 
   UserCourseUseCase(this.repository);
 
-  Future<void> enrollUser(String userId, String courseId) =>
+  Future<bool> enrollUser(String userId, String courseId) =>
       repository.enrollUser(userId, courseId);
 
   Future<List<String>> getUserCourses(String userId) =>
