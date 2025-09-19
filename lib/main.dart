@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 // Categorias
 import 'features/categories/domain/repositories/category_repository.dart';
 import 'features/categories/domain/usecases/category_usecases.dart';
-import 'features/categories/data/datasources/i_category_local_datasource.dart';
+import 'features/categories/data/datasources/i_category_Roble_datasource.dart';
 import 'features/categories/data/datasources/category_Roble_datasource.dart';
 import 'features/categories/data/repositories/category_repository_impl.dart';
 import 'features/categories/controllers/categories_controller.dart';
@@ -50,7 +50,7 @@ void main() async {
   Get.put(AuthenticationController(Get.find<AuthenticationUseCase>()), permanent: true);
 
   // ==================== Categorías ====================
-  Get.lazyPut<ICategoryLocalDataSource>(() => CategoryRobleDataSource(), fenix: true);
+  Get.lazyPut<ICategoryRobleDataSource>(() => CategoryRobleDataSource(), fenix: true);
   Get.lazyPut<CategoryRepository>(() => CategoryRepositoryImpl(Get.find()), fenix: true);
   Get.lazyPut(() => CategoryUseCases(Get.find()), fenix: true);
   Get.put(CategoriesController(useCases: Get.find()), permanent: true);

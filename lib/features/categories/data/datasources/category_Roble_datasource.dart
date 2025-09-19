@@ -5,10 +5,10 @@ import 'package:http/http.dart' as http;
 import 'package:loggy/loggy.dart';
 
 import '../models/category_model.dart';
-import 'i_category_local_datasource.dart';
+import 'i_category_Roble_datasource.dart';
 import '../../domain/entities/category.dart';
 
-class CategoryRobleDataSource implements ICategoryLocalDataSource {
+class CategoryRobleDataSource implements ICategoryRobleDataSource {
   final http.Client httpClient;
   final String baseUrl =
       'https://roble-api.openlab.uninorte.edu.co/database/database_364931dc19';
@@ -18,6 +18,7 @@ class CategoryRobleDataSource implements ICategoryLocalDataSource {
 
   @override
   Future<CategoryModel> create(CategoryModel category) async {
+    print("entro a create datasource");
     final body = {
       "tableName": "categories",
       "records": [
@@ -44,7 +45,9 @@ class CategoryRobleDataSource implements ICategoryLocalDataSource {
       },
       body: jsonEncode(body),
     );
-
+    
+    print("📡 Crear categoría → status: ${response.statusCode}");
+    print(response.body);
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
       final inserted = (data['inserted'] as List).first;
@@ -102,6 +105,7 @@ class CategoryRobleDataSource implements ICategoryLocalDataSource {
 
   @override
   Future<CategoryModel> update(CategoryModel category) async {
+    print("entro a update datasource roble: ${category.id}");
     if (category.id == null) {
       throw Exception("❌ Se requiere ID para actualizar categoría");
     }

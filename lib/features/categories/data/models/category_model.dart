@@ -18,12 +18,12 @@ class CategoryModel extends Category {
         );
 
   factory CategoryModel.fromMap(Map<String, dynamic> m) {
-    final idValue = m['id'];
+    final idValue = m['_id'];
     final String? id = idValue == null
         ? null
         : (idValue is String ? idValue : idValue.toString());
 
-    final courseRaw = m['courseId'];
+    final courseRaw = m['course_id'];
     final courseId = courseRaw is String
         ? courseRaw
         : courseRaw.toString();
@@ -31,19 +31,19 @@ class CategoryModel extends Category {
     final name = (m['name'] ?? '').toString();
 
     // groupingMethod: manejar explícitamente 'random' y 'self_assigned', fallback seguro
-    final groupingStr = (m['groupingMethod'] ?? '').toString();
+    final groupingStr = (m['grouping_method'] ?? '').toString();
     final groupingMethod = groupingStr == 'random'
         ? GroupingMethod.random
         : groupingStr == 'self_assigned'
             ? GroupingMethod.selfAssigned
             : GroupingMethod.selfAssigned;
 
-    final maxRaw = m['maxGroupSize'];
+    final maxRaw = m['max_group_size'];
     final int? maxGroupSize = maxRaw == null
         ? null
         : (maxRaw is int ? maxRaw : int.tryParse(maxRaw.toString()));
 
-    final createdRaw = m['createdAt'];
+    final createdRaw = m['created_at'];
     final DateTime? createdAt = createdRaw == null
         ? null
         : (createdRaw is DateTime

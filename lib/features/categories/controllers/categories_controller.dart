@@ -37,6 +37,7 @@ class CategoriesController extends GetxController {
       loading.value = true;
       error.value = '';
       
+      print("entro a addCategory controller");
       final newCategory = await useCases.createCategory(
         courseId: courseId,
         name: name,
