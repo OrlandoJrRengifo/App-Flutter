@@ -1,36 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-// Categorias
+// ==================== Categorías ====================
 import 'features/categories/domain/repositories/category_repository.dart';
 import 'features/categories/domain/usecases/category_usecases.dart';
 import 'features/categories/data/datasources/i_category_Roble_datasource.dart';
 import 'features/categories/data/datasources/category_Roble_datasource.dart';
 import 'features/categories/data/repositories/category_repository_impl.dart';
-import 'features/categories/presentation/controller/categories_controller.dart';
-// Cursos
+import 'features/categories/ui/controller/categories_controller.dart';
+
+// ==================== Cursos ====================
 import 'features/courses/domain/repositories/i_course_repository.dart';
 import 'features/courses/domain/usecases/course_usecases.dart';
 import 'features/courses/data/datasources/i_course_roble_datasource.dart';
 import 'features/courses/data/datasources/course_roble_datasource.dart';
 import 'features/courses/data/repositories/course_repository.dart';
-import 'features/courses/presentation/controller/course_controller.dart'; 
-// Inscripciones
-import 'features/RegToCourse/domain/repositories/i_user_course_repository.dart';
-import 'features/RegToCourse/domain/usecases/user_course_usecase.dart';
-import 'features/RegToCourse/data/datasources/i_user_course_roble_datasource.dart';
-import 'features/RegToCourse/data/datasources/user_course_roble_datasource.dart';
-import 'features/RegToCourse/data/repositories/user_course_repository.dart';
-import 'features/RegToCourse/presentation/controller/user_course_controller.dart';
+import 'features/courses/ui/controller/course_controller.dart'; 
+
+// ==================== Inscripciones ====================
+import 'features/reg_to_course/domain/repositories/i_user_course_repository.dart';
+import 'features/reg_to_course/domain/usecases/user_course_usecase.dart';
+import 'features/reg_to_course/data/datasources/i_user_course_roble_datasource.dart';
+import 'features/reg_to_course/data/datasources/user_course_roble_datasource.dart';
+import 'features/reg_to_course/data/repositories/user_course_repository.dart';
+import 'features/reg_to_course/ui/controller/user_course_controller.dart';
 
 // ==================== Autenticación ====================
 import 'features/auth/data/datasources/auth_roble_datasource.dart';
 import 'features/auth/data/datasources/i_auth_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_usecase.dart';
-import 'features/auth/presentation/controller/auth_controller.dart';
-import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/ui/controller/auth_controller.dart';
+import 'features/auth/ui/pages/login_page.dart';
 
+// ==================== FakeUser ====================
+import 'features/fake_users/data/datasources/fake_user_roble_source.dart';
+import 'features/fake_users/data/datasources/i_fake_user_source.dart';
+import 'features/fake_users/data/repositories/fake_user_repository.dart';
+import 'features/fake_users/domain/repositories/i_fake_user_repository.dart';
+import 'features/fake_users/domain/usecases/fake_user_usecase.dart';
+import 'features/fake_users/ui/controller/fake_user_controller.dart';
 
 import 'core/i_local_preferences.dart';
 import 'core/local_preferences_shared.dart';
@@ -47,6 +56,12 @@ void main() async {
   Get.put(AuthenticationUseCase(Get.find<AuthRepository>()), permanent: true);
   Get.put(AuthenticationController(Get.find<AuthenticationUseCase>()), permanent: true);
 
+  // ==================== FakeUser ====================
+  Get.put<IFakeUserSource>(FakeUserRobleSource(), permanent: true);
+  Get.put<IFakeUserRepository>(FakeUserRepository(Get.find<IFakeUserSource>()), permanent: true);
+  Get.put(FakeUserUseCase(Get.find<IFakeUserRepository>()), permanent: true);
+  Get.put(FakeUserController(Get.find<FakeUserUseCase>()), permanent: true);
+
   // ==================== Categorías ====================
   Get.lazyPut<ICategoryRobleDataSource>(() => CategoryRobleDataSource(), fenix: true);
   Get.lazyPut<CategoryRepository>(() => CategoryRepositoryImpl(Get.find()), fenix: true);
@@ -54,10 +69,7 @@ void main() async {
   Get.put(CategoriesController(useCases: Get.find()), permanent: true);
 
   // ==================== Cursos ====================
-  Get.lazyPut<ICourseRobleDataSource>(
-    () => CourseRobleDataSource(),
-    fenix: true,
-  );
+  Get.lazyPut<ICourseRobleDataSource>(() => CourseRobleDataSource(), fenix: true);
   Get.lazyPut<ICourseRepository>(() => CourseRepository(Get.find()), fenix: true);
   Get.lazyPut(() => CourseUseCases(Get.find()), fenix: true);
   Get.put(CoursesController(useCases: Get.find()), permanent: true);

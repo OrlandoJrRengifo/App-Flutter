@@ -8,12 +8,6 @@ class AuthRepository implements IAuthRepository {
   AuthRepository(this.authenticationSource);
 
   @override
-  Future<User?> getUser(String userId) async {
-    final model = await authenticationSource.getUser(userId);
-    return model;
-  }
-
-  @override
   Future<User?> login(String email, String password) async {
     return await authenticationSource.login(email, password);
   }

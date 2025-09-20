@@ -19,28 +19,6 @@ class AuthRobleSource implements IAuthenticationSource {
   AuthRobleSource({http.Client? client}) : httpClient = client ?? http.Client();
 
   @override
-  Future<User?> getUser(String userId) async {
-    //no sabia que estaba asi que esta por defecto
-    final response = await httpClient.get(
-      Uri.parse("$baseUrl/users/$userId"),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $_accessToken',
-      },
-    );
-
-    logInfo("Get user status: ${response.statusCode}");
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return User.fromJson(data);
-    } else {
-      final body = jsonDecode(response.body);
-      logError("Get user error ${response.statusCode}: ${body['message']}");
-      return null;
-    }
-  }
-
-  @override
   Future<User?> login(String email, String password) async {
     final response = await httpClient.post(
       Uri.parse("$baseUrl/login"),
@@ -50,14 +28,17 @@ class AuthRobleSource implements IAuthenticationSource {
 
     if (response.statusCode == 201) {
       final data = jsonDecode(response.body);
+      final userData = data['user'];
+
+      // ✅ Guardamos tokens
       _accessToken = data['accessToken'];
       _refreshToken = data['refreshToken'];
       final ILocalPreferences sharedPreferences = Get.find();
       sharedPreferences.storeData('token', _accessToken);
       sharedPreferences.storeData('refreshToken', _refreshToken);
-      logInfo("Token: $_accessToken"
-          "\nRefresh Token: $refreshToken");
-      return User.fromJson(data['user']);
+
+      // ✅ devolvemos un User normal (solo Auth)
+      return User.fromJson(userData);
     } else {
       final body = jsonDecode(response.body);
       logError("Login error ${response.statusCode}: ${body['message']}");
@@ -76,6 +57,10 @@ class AuthRobleSource implements IAuthenticationSource {
         "name": user.name,
       }),
     );
+
+    print("🔎 SignUp response: ${response.statusCode}");
+    print("🔎 SignUp body: ${response.body}");
+
     if (response.statusCode == 201 || response.statusCode == 200) {
       return true;
     }
