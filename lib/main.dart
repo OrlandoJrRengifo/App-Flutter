@@ -7,14 +7,12 @@ import 'features/categories/domain/usecases/category_usecases.dart';
 import 'features/categories/data/datasources/i_category_Roble_datasource.dart';
 import 'features/categories/data/datasources/category_Roble_datasource.dart';
 import 'features/categories/data/repositories/category_repository_impl.dart';
-import 'features/categories/controllers/categories_controller.dart';
+import 'features/categories/presentation/controller/categories_controller.dart';
 // Cursos
 import 'features/courses/domain/repositories/i_course_repository.dart';
 import 'features/courses/domain/usecases/course_usecases.dart';
-//import 'features/courses/data/datasources/i_course_local_datasource.dart';
 import 'features/courses/data/datasources/i_course_roble_datasource.dart';
 import 'features/courses/data/datasources/course_roble_datasource.dart';
-//import 'features/courses/data/datasources/course_local_datasource_sqflite.dart';
 import 'features/courses/data/repositories/course_repository.dart';
 import 'features/courses/presentation/controller/course_controller.dart'; 
 // Inscripciones

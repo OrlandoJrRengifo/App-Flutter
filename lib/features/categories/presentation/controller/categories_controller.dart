@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../domain/entities/category.dart';
-import '../domain/usecases/category_usecases.dart';
+import '../../domain/entities/category.dart';
+import '../../domain/usecases/category_usecases.dart';
 
 
 class CategoriesController extends GetxController {

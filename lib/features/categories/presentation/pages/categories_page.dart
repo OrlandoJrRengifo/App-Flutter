@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../domain/entities/category.dart';
-import '../../controllers/categories_controller.dart';
-import '../widgets/category_form.dart';
+import '../controller/categories_controller.dart';
+import '../../../courses/presentation/controller/course_controller.dart';
+import '../../../auth/presentation/controller/auth_controller.dart';
+import '../../presentation/widgets/category_form.dart';
 
 class CategoriesPage extends StatefulWidget {
   final String courseId;
@@ -21,13 +23,28 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   late final CategoriesController controller;
+  late final CoursesController coursesController;
+  late final AuthenticationController authController;
+
+  bool isOwner = false;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<CategoriesController>();
+    coursesController = Get.find<CoursesController>();
+    authController = Get.find<AuthenticationController>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // verificar si el usuario actual es el dueño del curso
+      final course = await coursesController.useCases.getCourse(widget.courseId);
+      final currentUserId = authController.currentUser.value?.id;
+      if (course != null && currentUserId != null) {
+        setState(() {
+          isOwner = course.teacherId == currentUserId;
+        });
+      }
+
       controller.loadCategories(widget.courseId);
     });
   }
@@ -59,22 +76,24 @@ class _CategoriesPageState extends State<CategoriesPage> {
         }
 
         if (controller.categories.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.category, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
+                const Icon(Icons.category, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
                 Text(
                   "No hay categorías creadas",
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  style: const TextStyle(fontSize: 18, color: Colors.grey),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  "Crea una categoría para agrupar estudiantes",
-                  style: TextStyle(color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
+                if (isOwner) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Crea una categoría para agrupar estudiantes",
+                    style: TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ]
               ],
             ),
           );
@@ -125,58 +144,59 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     ),
                   ],
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () async {
-                        final result = await Get.dialog<Category>(
-                          CategoryFormDialog(
-                            courseId: widget.courseId,
-                            category: cat,
-                          ),
-                        );
-                        print("entro a update datasource: ${widget.courseId}");
-                        print("entro a update datasource de cat: ${cat.name}");
-                        if (result != null) {
-                          await controller.updateCategoryInList(result);
-                        }
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () async {
-                        final confirm = await Get.dialog<bool>(
-                          AlertDialog(
-                            title: const Text("Eliminar categoría"),
-                            content: Text(
-                              "¿Seguro que deseas eliminar '${cat.name}'?\n\n"
-                              "Esta acción también eliminará todos los grupos asociados.",
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Get.back(result: false),
-                                child: const Text("Cancelar"),
-                              ),
-                              TextButton(
-                                onPressed: () => Get.back(result: true),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.red,
+                trailing: isOwner
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () async {
+                              final result = await Get.dialog<Category>(
+                                CategoryFormDialog(
+                                  courseId: widget.courseId,
+                                  category: cat,
                                 ),
-                                child: const Text("Eliminar"),
-                              ),
-                            ],
+                              );
+                              if (result != null) {
+                                await controller.updateCategoryInList(result);
+                              }
+                            },
                           ),
-                        );
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              final confirm = await Get.dialog<bool>(
+                                AlertDialog(
+                                  title: const Text("Eliminar categoría"),
+                                  content: Text(
+                                    "¿Seguro que deseas eliminar '${cat.name}'?\n\n"
+                                    "Esta acción también eliminará todos los grupos asociados.",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Get.back(result: false),
+                                      child: const Text("Cancelar"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Get.back(result: true),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                      ),
+                                      child: const Text("Eliminar"),
+                                    ),
+                                  ],
+                                ),
+                              );
 
-                        if (confirm == true) {
-                          await controller.deleteCategoryFromList(cat.id);
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                              if (confirm == true) {
+                                await controller.deleteCategoryFromList(cat.id);
+                              }
+                            },
+                          ),
+                        ],
+                      )
+                    : null,
                 onTap: () {
                   Get.snackbar(
                     "Información",
@@ -189,42 +209,46 @@ class _CategoriesPageState extends State<CategoriesPage> {
           },
         );
       }),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Get.dialog<Category>(
-            CategoryFormDialog(courseId: widget.courseId),
-          );
 
-          if (result != null) {
-            try {
-              await controller.addCategory(
-                courseId: result.courseId,
-                name: result.name,
-                groupingMethod: result.groupingMethod,
-                maxMembers: result.maxGroupSize ?? 1,
-              );
+      // FAB solo para el dueño del curso
+      floatingActionButton: isOwner
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Get.dialog<Category>(
+                  CategoryFormDialog(courseId: widget.courseId),
+                );
 
-              Get.snackbar(
-                "¡Éxito!",
-                "Categoría '${result.name}' creada correctamente",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green[100],
-                colorText: Colors.green[800],
-              );
-            } catch (e) {
-              Get.snackbar(
-                "Error",
-                e.toString(),
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
-              );
-            }
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Crear categoría"),
-      ),
+                if (result != null) {
+                  try {
+                    await controller.addCategory(
+                      courseId: result.courseId,
+                      name: result.name,
+                      groupingMethod: result.groupingMethod,
+                      maxMembers: result.maxGroupSize ?? 1,
+                    );
+
+                    Get.snackbar(
+                      "¡Éxito!",
+                      "Categoría '${result.name}' creada correctamente",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green[100],
+                      colorText: Colors.green[800],
+                    );
+                  } catch (e) {
+                    Get.snackbar(
+                      "Error",
+                      e.toString(),
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red[100],
+                      colorText: Colors.red[800],
+                    );
+                  }
+                }
+              },
+              icon: const Icon(Icons.add),
+              label: const Text("Crear categoría"),
+            )
+          : null,
     );
   }
 }
