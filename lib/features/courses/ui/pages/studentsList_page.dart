@@ -50,7 +50,7 @@ class _StudentslistPageState extends State<StudentslistPage> {
 
     // 3. Mapearlos a Map<String, dynamic> para mostrarlos en la lista
     final mapped = fetchedUsers.map((u) => {
-          "id": u.id,
+          "id": u.authId,
           "name": u.name,
           "email": u.email,
         }).toList();

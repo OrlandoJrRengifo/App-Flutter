@@ -4,7 +4,7 @@ import '../repositories/category_repository.dart';
 
 class CategoryUseCases {
   final CategoryRepository repository;
-  
+
   CategoryUseCases(this.repository);
 
   Future<Category> createCategory({
@@ -24,12 +24,19 @@ class CategoryUseCases {
   }
 
   Future<void> deleteCategory(String id) => repository.delete(id);
-  
+
   Future<Category?> getCategory(String id) => repository.getById(id);
 
-  Future<List<Category>> listCategories(String courseId) => repository.listByCourse(courseId);
-  
-  Future<Category> updateCategory(Category category) => repository.update(category);
+  Future<List<Category>> listCategories(String courseId) =>
+      repository.listByCourse(courseId);
+
+  Future<Category> updateCategory(Category category) =>
+      repository.update(category);
+
+  Future<String?> getCourseIdFromCategory(String categoryId) async {
+    final category = await repository.getById(categoryId);
+    return category?.courseId;
+  }
 
   Future<List<List<int>>> formRandomGroups(
     String categoryId,

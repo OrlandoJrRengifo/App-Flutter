@@ -26,8 +26,8 @@ class AuthenticationController extends GetxController {
       final fakeUserController = Get.find<FakeUserController>();
       await fakeUserController.createUserIfNotExists(
         authId: user.id ?? "",
-        email: user.email ?? "",
-        name: user.name ?? "",
+        email: user.email,
+        name: user.name,
       );
 
       currentUser.value = user;

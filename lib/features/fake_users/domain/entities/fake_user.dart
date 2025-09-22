@@ -12,8 +12,9 @@ class FakeUser {
   });
 
   factory FakeUser.fromJson(Map<String, dynamic> json) {
+    print("👀 JSON recibido en FakeUser.fromJson: $json");
     return FakeUser(
-      id: json['id'] as String?,
+      id: json['_id'] as String?,
       authId: json['auth_id'] ?? '',
       email: json['email'] ?? '',
       name: json['name'] ?? '',

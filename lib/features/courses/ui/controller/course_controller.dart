@@ -49,7 +49,9 @@ class CoursesController extends GetxController {
       final result = await useCases.listCoursesByTeacher(user.id!);
       courses.assignAll(result);
 
-      print("✅ Cursos cargados para el usuario ${user.name}: ${courses.map((c) => c.name).toList()}");
+      print(
+        "✅ Cursos cargados para el usuario ${user.name}: ${courses.map((c) => c.name).toList()}",
+      );
     } catch (e) {
       error.value = e.toString();
       print("❌ Error al cargar cursos: $e");
@@ -190,5 +192,18 @@ class CoursesController extends GetxController {
     } finally {
       loading.value = false;
     }
+  }
+
+  Future<bool> isOwnerOfCourse(String courseId) async {
+    final user = _authController.currentUser.value;
+    if (user == null) return false;
+
+    final exists = courses.any(
+      (c) => c.id == courseId && c.teacherId == user.id,
+    );
+    if (exists) return true;
+
+    final course = await useCases.getCourse(courseId);
+    return course?.teacherId == user.id;
   }
 }

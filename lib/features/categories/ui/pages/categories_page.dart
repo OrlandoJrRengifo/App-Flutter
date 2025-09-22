@@ -6,16 +6,15 @@ import '../controller/categories_controller.dart';
 import '../../../courses/ui/controller/course_controller.dart';
 import '../../../auth/ui/controller/auth_controller.dart';
 import '../widgets/category_form.dart';
+import '../../../groups/ui/pages/groups_page.dart';
+import '../../../groups/ui/controller/group_controller.dart';
+import '../../../reg_to_course/ui/controller/user_course_controller.dart';
 
 class CategoriesPage extends StatefulWidget {
   final String courseId;
-  final String? courseName; 
-  
-  const CategoriesPage({
-    super.key,
-    required this.courseId,
-    this.courseName,
-  });
+  final String? courseName;
+
+  const CategoriesPage({super.key, required this.courseId, this.courseName});
 
   @override
   State<CategoriesPage> createState() => _CategoriesPageState();
@@ -37,7 +36,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // verificar si el usuario actual es el dueño del curso
-      final course = await coursesController.useCases.getCourse(widget.courseId);
+      final course = await coursesController.useCases.getCourse(
+        widget.courseId,
+      );
       final currentUserId = authController.currentUser.value?.id;
       if (course != null && currentUserId != null) {
         setState(() {
@@ -93,7 +94,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     style: TextStyle(color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
-                ]
+                ],
               ],
             ),
           );
@@ -174,8 +175,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                   ),
                                   actions: [
                                     TextButton(
-                                      onPressed: () =>
-                                          Get.back(result: false),
+                                      onPressed: () => Get.back(result: false),
                                       child: const Text("Cancelar"),
                                     ),
                                     TextButton(
@@ -198,11 +198,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       )
                     : null,
                 onTap: () {
-                  Get.snackbar(
-                    "Información",
-                    "Tap en '${cat.name}' - ID: ${cat.id}",
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  if (cat.id != null) {
+                    Get.to(
+                      () => GroupsPage(
+                        categoryId: cat.id!,
+                        defaultCapacity: cat.maxGroupSize ?? 1,
+                      ),
+                    );
+                  } else {
+                    print("⚠️ Category sin id!");
+                  }
                 },
               ),
             );
@@ -212,43 +217,68 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
       // FAB solo para el dueño del curso
       floatingActionButton: isOwner
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                final result = await Get.dialog<Category>(
-                  CategoryFormDialog(courseId: widget.courseId),
-                );
+    ? FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Get.dialog<Category>(
+            CategoryFormDialog(courseId: widget.courseId),
+          );
 
-                if (result != null) {
-                  try {
-                    await controller.addCategory(
-                      courseId: result.courseId,
-                      name: result.name,
-                      groupingMethod: result.groupingMethod,
-                      maxMembers: result.maxGroupSize ?? 1,
-                    );
+          if (result != null) {
+            try {
+              // 1. Crear la categoría
+              await controller.addCategory(
+                courseId: result.courseId,
+                name: result.name,
+                groupingMethod: result.groupingMethod,
+                maxMembers: result.maxGroupSize ?? 1,
+              );
 
-                    Get.snackbar(
-                      "¡Éxito!",
-                      "Categoría '${result.name}' creada correctamente",
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.green[100],
-                      colorText: Colors.green[800],
-                    );
-                  } catch (e) {
-                    Get.snackbar(
-                      "Error",
-                      e.toString(),
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.red[100],
-                      colorText: Colors.red[800],
-                    );
-                  }
+              // 2. Obtener la categoría recién creada del listado del controller
+              final createdCategory = controller.categories.last;
+
+              // 3. Obtener estudiantes inscritos en el curso
+              final userCourseController = Get.find<UserCourseController>();
+              await userCourseController.fetchCourseUsers(widget.courseId);
+              final totalStudents = userCourseController.courseUsers.length;
+
+              if (totalStudents > 0 && createdCategory.id != null) {
+                final maxGroupSize = result.maxGroupSize ?? 1;
+
+                // 4. Calcular cuántos grupos crear
+                final groupsNeeded = (totalStudents / maxGroupSize).ceil();
+
+                // 5. Crear los grupos automáticamente
+                final groupController = Get.find<GroupController>();
+                for (int i = 1; i <= groupsNeeded; i++) {
+                  await groupController.addGroup(
+                    createdCategory.id!,
+                    maxGroupSize,
+                  );
                 }
-              },
-              icon: const Icon(Icons.add),
-              label: const Text("Crear categoría"),
-            )
-          : null,
+              }
+
+              Get.snackbar(
+                "¡Éxito!",
+                "Categoría '${result.name}' creada con sus grupos",
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green[100],
+                colorText: Colors.green[800],
+              );
+            } catch (e) {
+              Get.snackbar(
+                "Error",
+                e.toString(),
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.red[100],
+                colorText: Colors.red[800],
+              );
+            }
+          }
+        },
+        icon: const Icon(Icons.add),
+        label: const Text("Crear categoría"),
+      )
+    : null,
     );
   }
 }

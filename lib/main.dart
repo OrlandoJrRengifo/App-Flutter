@@ -15,7 +15,7 @@ import 'features/courses/domain/usecases/course_usecases.dart';
 import 'features/courses/data/datasources/i_course_roble_datasource.dart';
 import 'features/courses/data/datasources/course_roble_datasource.dart';
 import 'features/courses/data/repositories/course_repository.dart';
-import 'features/courses/ui/controller/course_controller.dart'; 
+import 'features/courses/ui/controller/course_controller.dart';
 
 // ==================== Inscripciones ====================
 import 'features/reg_to_course/domain/repositories/i_user_course_repository.dart';
@@ -41,6 +41,14 @@ import 'features/fake_users/domain/repositories/i_fake_user_repository.dart';
 import 'features/fake_users/domain/usecases/fake_user_usecase.dart';
 import 'features/fake_users/ui/controller/fake_user_controller.dart';
 
+// ==================== Grupos ====================
+import 'features/groups/data/datasources/group_roble_source.dart';
+import 'features/groups/data/datasources/i_group_source.dart';
+import 'features/groups/domain/repositories/i_group_repository.dart';
+import 'features/groups/data/repositories/group_repository.dart';
+import 'features/groups/domain/usecases/group_usecase.dart';
+import 'features/groups/ui/controller/group_controller.dart';
+
 import 'core/i_local_preferences.dart';
 import 'core/local_preferences_shared.dart';
 
@@ -54,31 +62,37 @@ void main() async {
   Get.put<IAuthenticationSource>(AuthRobleSource(), permanent: true);
   Get.put(AuthRepository(Get.find<IAuthenticationSource>()), permanent: true);
   Get.put(AuthenticationUseCase(Get.find<AuthRepository>()), permanent: true);
-  Get.put(AuthenticationController(Get.find<AuthenticationUseCase>()), permanent: true);
+  Get.put(AuthenticationController(Get.find<AuthenticationUseCase>()),permanent: true,);
 
   // ==================== FakeUser ====================
   Get.put<IFakeUserSource>(FakeUserRobleSource(), permanent: true);
-  Get.put<IFakeUserRepository>(FakeUserRepository(Get.find<IFakeUserSource>()), permanent: true);
+  Get.put<IFakeUserRepository>(FakeUserRepository(Get.find<IFakeUserSource>()),permanent: true,);
   Get.put(FakeUserUseCase(Get.find<IFakeUserRepository>()), permanent: true);
   Get.put(FakeUserController(Get.find<FakeUserUseCase>()), permanent: true);
 
   // ==================== Categorías ====================
-  Get.lazyPut<ICategoryRobleDataSource>(() => CategoryRobleDataSource(), fenix: true);
-  Get.lazyPut<CategoryRepository>(() => CategoryRepositoryImpl(Get.find()), fenix: true);
+  Get.lazyPut<ICategoryRobleDataSource>(() => CategoryRobleDataSource(),fenix: true,);
+  Get.lazyPut<CategoryRepository>(() => CategoryRepositoryImpl(Get.find()),fenix: true,);
   Get.lazyPut(() => CategoryUseCases(Get.find()), fenix: true);
   Get.put(CategoriesController(useCases: Get.find()), permanent: true);
 
   // ==================== Cursos ====================
-  Get.lazyPut<ICourseRobleDataSource>(() => CourseRobleDataSource(), fenix: true);
-  Get.lazyPut<ICourseRepository>(() => CourseRepository(Get.find()), fenix: true);
+  Get.lazyPut<ICourseRobleDataSource>(() => CourseRobleDataSource(),fenix: true,);
+  Get.lazyPut<ICourseRepository>(() => CourseRepository(Get.find()),fenix: true,);
   Get.lazyPut(() => CourseUseCases(Get.find()), fenix: true);
   Get.put(CoursesController(useCases: Get.find()), permanent: true);
 
   // ==================== Inscripciones ====================
-  Get.lazyPut<IUserCourseRobleDataSource>(() => UserCourseRobleDataSource(), fenix: true);
-  Get.lazyPut<IUserCourseRepository>(() => UserCourseRepository(Get.find()), fenix: true);
+  Get.lazyPut<IUserCourseRobleDataSource>(() => UserCourseRobleDataSource(),fenix: true,);
+  Get.lazyPut<IUserCourseRepository>(() => UserCourseRepository(Get.find()),fenix: true,);
   Get.lazyPut(() => UserCourseUseCase(Get.find()), fenix: true);
   Get.put(UserCourseController(Get.find()), permanent: true);
+
+  // ==================== Grupos ====================
+  Get.put<IGroupSource>(GroupRobleSource(), permanent: true);
+  Get.put<IGroupRepository>(GroupRepository(Get.find()), permanent: true);
+  Get.put(GroupUseCase(Get.find()), permanent: true);  
+  Get.put(GroupController(Get.find()), permanent: true);
 
   runApp(const MyApp());
 }
