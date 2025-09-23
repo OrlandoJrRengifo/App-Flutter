@@ -206,4 +206,16 @@ class CoursesController extends GetxController {
     final course = await useCases.getCourse(courseId);
     return course?.teacherId == user.id;
   }
+
+  Future<bool> canJoinCourse(String courseId) async {
+  final user = _authController.currentUser.value;
+  if (user == null) return false;
+
+  final course = await useCases.getCourse(courseId);
+  if (course == null) return false;
+
+  // ❌ Si el usuario es dueño (teacher_id == user.id) → no puede inscribirse
+  return course.teacherId != user.id;
+}
+
 }

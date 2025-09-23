@@ -11,7 +11,7 @@ class UserGroupRobleDataSource implements IUserGroupDataSource {
       "https://roble-api.openlab.uninorte.edu.co/database/database_364931dc19";
 
   UserGroupRobleDataSource({http.Client? client})
-      : httpClient = client ?? http.Client();
+    : httpClient = client ?? http.Client();
 
   @override
   Future<bool> joinGroup(String userId, String groupId) async {
@@ -57,7 +57,9 @@ class UserGroupRobleDataSource implements IUserGroupDataSource {
       headers: {"Authorization": "Bearer $token"},
     );
 
-    logInfo("🔎 find user_group → ${findResponse.statusCode} ${findResponse.body}");
+    logInfo(
+      "🔎 find user_group → ${findResponse.statusCode} ${findResponse.body}",
+    );
 
     if (findResponse.statusCode != 200) {
       logError("❌ Error buscando user_group: ${findResponse.statusCode}");
@@ -93,7 +95,9 @@ class UserGroupRobleDataSource implements IUserGroupDataSource {
       body: jsonEncode(deleteBody),
     );
 
-    logInfo("🗑️ LeaveGroup DELETE → ${deleteResponse.statusCode} ${deleteResponse.body}");
+    logInfo(
+      "🗑️ LeaveGroup DELETE → ${deleteResponse.statusCode} ${deleteResponse.body}",
+    );
     return deleteResponse.statusCode == 200;
   }
 
@@ -120,59 +124,81 @@ class UserGroupRobleDataSource implements IUserGroupDataSource {
   }
 
   @override
-Future<String?> getUserGroupInCategory(String userId, String categoryId) async {
-  final ILocalPreferences prefs = Get.find();
-  final token = await prefs.retrieveData<String>('token');
+  Future<String?> getUserGroupInCategory(
+    String userId,
+    String categoryId,
+  ) async {
+    final ILocalPreferences prefs = Get.find();
+    final token = await prefs.retrieveData<String>('token');
 
-  // 1) Traer todos los user_groups del usuario
-  final userGroupsUri = Uri.parse("$baseUrl/read").replace(
-    queryParameters: {
-      "tableName": "user_groups",
-      "user_id": userId,
-    },
-  );
+    // 1) Traer todos los user_groups del usuario
+    final userGroupsUri = Uri.parse(
+      "$baseUrl/read",
+    ).replace(queryParameters: {"tableName": "user_groups", "user_id": userId});
 
-  final ugRes = await httpClient.get(
-    userGroupsUri,
-    headers: {"Authorization": "Bearer $token"},
-  );
-
-  logInfo("📡 getUserGroupInCategory.user_groups → ${ugRes.statusCode} ${ugRes.body}");
-  if (ugRes.statusCode != 200) return null;
-
-  final ugList = jsonDecode(ugRes.body) as List;
-  if (ugList.isEmpty) return null;
-
-  // 2) Iterar cada group_id y revisar categoría
-  for (final ug in ugList) {
-    final gid = ug["group_id"];
-    if (gid == null) continue;
-
-    final groupUri = Uri.parse("$baseUrl/read").replace(
-      queryParameters: {
-        "tableName": "groups",
-        "_id": gid.toString(),
-      },
-    );
-
-    final gRes = await httpClient.get(
-      groupUri,
+    final ugRes = await httpClient.get(
+      userGroupsUri,
       headers: {"Authorization": "Bearer $token"},
     );
 
-    if (gRes.statusCode != 200) continue;
+    logInfo(
+      "📡 getUserGroupInCategory.user_groups → ${ugRes.statusCode} ${ugRes.body}",
+    );
+    if (ugRes.statusCode != 200) return null;
 
-    final gList = jsonDecode(gRes.body) as List;
-    if (gList.isEmpty) continue;
+    final ugList = jsonDecode(ugRes.body) as List;
+    if (ugList.isEmpty) return null;
 
-    final group = gList.first as Map<String, dynamic>;
-    if (group["category_id"].toString() == categoryId) {
-      // ✅ Usuario ya está en un grupo de esa categoría
-      return gid.toString();
+    // 2) Iterar cada group_id y revisar categoría
+    for (final ug in ugList) {
+      final gid = ug["group_id"];
+      if (gid == null) continue;
+
+      final groupUri = Uri.parse("$baseUrl/read").replace(
+        queryParameters: {"tableName": "groups", "_id": gid.toString()},
+      );
+
+      final gRes = await httpClient.get(
+        groupUri,
+        headers: {"Authorization": "Bearer $token"},
+      );
+
+      if (gRes.statusCode != 200) continue;
+
+      final gList = jsonDecode(gRes.body) as List;
+      if (gList.isEmpty) continue;
+
+      final group = gList.first as Map<String, dynamic>;
+      if (group["category_id"].toString() == categoryId) {
+        // ✅ Usuario ya está en un grupo de esa categoría
+        return gid.toString();
+      }
     }
+
+    return null;
   }
 
-  return null;
-}
+  Future<Map<String, dynamic>?> getCategory(String categoryId) async {
+    final ILocalPreferences prefs = Get.find();
+    final token = await prefs.retrieveData<String>('token');
 
+    final uri = Uri.parse("$baseUrl/read").replace(
+      queryParameters: {
+        "tableName": "categories",
+        "_id": categoryId,
+      },
+    );
+
+    final res = await httpClient.get(
+      uri,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    logInfo("📡 getCategory → ${res.statusCode} ${res.body}");
+
+    if (res.statusCode != 200) return null;
+    final list = jsonDecode(res.body) as List;
+    if (list.isEmpty) return null;
+    return list.first as Map<String, dynamic>;
+  }
 }

@@ -4,6 +4,8 @@ import '../../../auth/ui/controller/auth_controller.dart';
 import '../controller/user_group_controller.dart';
 import '../../../fake_users/ui/controller/fake_user_controller.dart';
 import '../../../fake_users/domain/entities/fake_user.dart';
+import '../../../courses/ui/controller/course_controller.dart';
+import '../../../categories/ui/controller/categories_controller.dart';
 
 class GroupMembersList extends StatefulWidget {
   final String groupId;
@@ -16,17 +18,18 @@ class GroupMembersList extends StatefulWidget {
   });
 
   @override
-  State<GroupMembersList> createState() => _GroupDetailPageState();
+  State<GroupMembersList> createState() => _GroupMembersListState();
 }
 
-class _GroupDetailPageState extends State<GroupMembersList> {
+class _GroupMembersListState extends State<GroupMembersList> {
   late final UserGroupController userGroupController;
   late final FakeUserController fakeUserController;
   late final String currentUserId;
 
-  /// Lista de usuarios con datos completos (name, email)
   final RxList<FakeUser> groupUserDetails = <FakeUser>[].obs;
   final RxBool inCategory = false.obs;
+  final RxBool stateLoaded = false.obs;
+  final RxBool isTeacher = false.obs;
 
   @override
   void initState() {
@@ -37,29 +40,46 @@ class _GroupDetailPageState extends State<GroupMembersList> {
     final authController = Get.find<AuthenticationController>();
     currentUserId = authController.currentUser.value?.id ?? "";
 
-    _loadState();
+    _initialize();
   }
 
-  Future<void> _loadState() async {
-    await _loadGroupUsers();
-    inCategory.value = await userGroupController.isUserInCategory(
-      currentUserId,
-      widget.categoryId,
-    );
-  }
+  /// Carga usuarios y verifica si es teacher en paralelo
+  Future<void> _initialize() async {
+    final categoryController = Get.find<CategoriesController>();
+    final coursesController = Get.find<CoursesController>();
 
-  Future<void> _loadGroupUsers() async {
-    await userGroupController.fetchGroupUsers(widget.groupId);
+    // Carga de grupo y verificación de teacher en paralelo
+    final courseIdFuture = categoryController.getCourseId(widget.categoryId);
+    final groupUsersFuture = userGroupController.fetchGroupUsers(widget.groupId);
+    final inCategoryFuture = userGroupController.isUserInCategory(currentUserId, widget.categoryId);
+
+    final courseId = await courseIdFuture;
+    isTeacher.value = courseId != null &&
+        coursesController.courses.any(
+          (c) => c.id == courseId && c.teacherId == currentUserId,
+        );
+
+    await groupUsersFuture;
+    inCategory.value = await inCategoryFuture;
+
+    // Carga de detalles completos de los usuarios
     final ids = userGroupController.groupUsers.toList();
     final users = await fakeUserController.getUsersByIds(ids);
     groupUserDetails.assignAll(users);
+
+    stateLoaded.value = true;
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Detalles del grupo")),
-      body: Column(
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: const Text("Detalles del grupo")),
+    body: Obx(() {
+      if (!stateLoaded.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      return Column(
         children: [
           Expanded(
             child: Obx(() {
@@ -85,6 +105,10 @@ class _GroupDetailPageState extends State<GroupMembersList> {
             final isMember =
                 userGroupController.groupUsers.contains(currentUserId);
 
+            // Si es teacher, no mostramos botones
+            if (isTeacher.value) return const SizedBox.shrink();
+
+            // Botón de salir si es miembro
             if (isMember) {
               return Padding(
                 padding: const EdgeInsets.all(12),
@@ -95,12 +119,17 @@ class _GroupDetailPageState extends State<GroupMembersList> {
                   ),
                   onPressed: () async {
                     final ok = await userGroupController.leaveGroup(
-                        currentUserId, widget.groupId);
+                      currentUserId,
+                      widget.groupId,
+                    );
                     if (!ok) {
-                      Get.snackbar("Error", "No se pudo salir del grupo",
-                          snackPosition: SnackPosition.BOTTOM);
+                      Get.snackbar(
+                        "Error",
+                        "No se pudo salir del grupo",
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
                     }
-                    await _loadState();
+                    await _initialize();
                   },
                   icon: const Icon(Icons.exit_to_app),
                   label: const Text("Salir del grupo"),
@@ -108,6 +137,7 @@ class _GroupDetailPageState extends State<GroupMembersList> {
               );
             }
 
+            // Advertencia si ya pertenece a otro grupo en la categoría
             if (inCategory.value) {
               return const Padding(
                 padding: EdgeInsets.all(12),
@@ -119,6 +149,7 @@ class _GroupDetailPageState extends State<GroupMembersList> {
               );
             }
 
+            // Botón para unirse si no es miembro ni teacher
             return Padding(
               padding: const EdgeInsets.all(12),
               child: ElevatedButton.icon(
@@ -134,7 +165,7 @@ class _GroupDetailPageState extends State<GroupMembersList> {
                   );
 
                   if (success) {
-                    await _loadState();
+                    await _initialize();
                   } else {
                     Get.snackbar(
                       "Ya perteneces a un grupo",
@@ -151,7 +182,9 @@ class _GroupDetailPageState extends State<GroupMembersList> {
             );
           }),
         ],
-      ),
-    );
-  }
+      );
+    }),
+  );
+}
+
 }

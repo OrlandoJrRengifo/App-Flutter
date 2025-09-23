@@ -33,7 +33,16 @@ class UserCoursesPage extends StatelessWidget {
           future: Future.wait(
             courseIds.map((id) async {
               final c = await courseUseCases.getCourse(id);
-              if (c == null) return Course(id: id, name: "Desconocido", code: "-", maxStudents: 0, teacherId: "hola"); 
+              if (c == null) {
+                print("⚠️ Curso con ID $id no encontrado");
+                return Course(
+                  id: id,
+                  code: "Desconocido",
+                  name: "Curso no encontrado",
+                  teacherId: "",
+                  maxStudents: 0,
+                );
+              }
               return c;
               }),
           ),
@@ -63,4 +72,3 @@ class UserCoursesPage extends StatelessWidget {
     );
   }
 }
-// Nota: Asegúrate de que los controladores y casos de uso estén correctamente inyectados en GetX

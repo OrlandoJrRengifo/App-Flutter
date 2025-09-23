@@ -16,4 +16,9 @@ class UserGroupUseCase {
 
   Future<String?> getUserGroupInCategory(String userId, String categoryId) =>
       repository.getUserGroupInCategory(userId, categoryId);
+
+  Future<String?> getCourseId(String categoryId) async {
+    final cat = await repository.getCategory(categoryId);
+    return cat?["course_id"]?.toString();
+  }
 }

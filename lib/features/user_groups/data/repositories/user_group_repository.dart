@@ -21,4 +21,8 @@ class UserGroupRepository implements IUserGroupRepository {
   @override
   Future<String?> getUserGroupInCategory(String userId, String categoryId) =>
       robleDataSource.getUserGroupInCategory(userId, categoryId);
+  
+  @override
+  Future<Map<String, dynamic>?> getCategory(String id) =>
+      robleDataSource.getCategory(id);
 }

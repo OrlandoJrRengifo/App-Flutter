@@ -9,6 +9,7 @@ import '../widgets/category_form.dart';
 import '../../../groups/ui/pages/groups_page.dart';
 import '../../../groups/ui/controller/group_controller.dart';
 import '../../../user_courses/ui/controller/user_course_controller.dart';
+import '../../../user_groups/ui/controller/user_group_controller.dart';
 
 class CategoriesPage extends StatefulWidget {
   final String courseId;
@@ -34,19 +35,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
     coursesController = Get.find<CoursesController>();
     authController = Get.find<AuthenticationController>();
 
+    controller.loading.value = true;
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // verificar si el usuario actual es el dueño del curso
-      final course = await coursesController.useCases.getCourse(
-        widget.courseId,
-      );
+      final course = await coursesController.useCases.getCourse(widget.courseId);
       final currentUserId = authController.currentUser.value?.id;
       if (course != null && currentUserId != null) {
         setState(() {
           isOwner = course.teacherId == currentUserId;
         });
       }
-
-      controller.loadCategories(widget.courseId);
+      await controller.loadCategories(widget.courseId);
     });
   }
 
@@ -54,9 +53,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        if (controller.loading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        if (controller.loading.value) return const Center(child: CircularProgressIndicator());
 
         if (controller.error.isNotEmpty) {
           return Center(
@@ -83,9 +80,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
               children: [
                 const Icon(Icons.category, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   "No hay categorías creadas",
-                  style: const TextStyle(fontSize: 18, color: Colors.grey),
+                  style: TextStyle(fontSize: 18, color: Colors.grey),
                 ),
                 if (isOwner) ...[
                   const SizedBox(height: 8),
@@ -114,20 +111,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       ? Colors.orange[100]
                       : Colors.green[100],
                   child: Icon(
-                    cat.groupingMethod == GroupingMethod.random
-                        ? Icons.shuffle
-                        : Icons.group,
-                    color: cat.groupingMethod == GroupingMethod.random
-                        ? Colors.orange[800]
-                        : Colors.green[800],
+                    cat.groupingMethod == GroupingMethod.random ? Icons.shuffle : Icons.group,
+                    color: cat.groupingMethod == GroupingMethod.random ? Colors.orange[800] : Colors.green[800],
                   ),
                 ),
                 title: Text(
                   cat.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,9 +127,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     Text(
                       "Método: ${cat.groupingMethod == GroupingMethod.random ? 'Aleatorio' : 'Auto-asignado'}",
                       style: TextStyle(
-                        color: cat.groupingMethod == GroupingMethod.random
-                            ? Colors.orange[700]
-                            : Colors.green[700],
+                        color: cat.groupingMethod == GroupingMethod.random ? Colors.orange[700] : Colors.green[700],
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -153,14 +141,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () async {
                               final result = await Get.dialog<Category>(
-                                CategoryFormDialog(
-                                  courseId: widget.courseId,
-                                  category: cat,
-                                ),
+                                CategoryFormDialog(courseId: widget.courseId, category: cat),
                               );
-                              if (result != null) {
-                                await controller.updateCategoryInList(result);
-                              }
+                              if (result != null) await controller.updateCategoryInList(result);
                             },
                           ),
                           IconButton(
@@ -170,28 +153,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                 AlertDialog(
                                   title: const Text("Eliminar categoría"),
                                   content: Text(
-                                    "¿Seguro que deseas eliminar '${cat.name}'?\n\n"
-                                    "Esta acción también eliminará todos los grupos asociados.",
+                                    "¿Seguro que deseas eliminar '${cat.name}'?\nEsta acción también eliminará todos los grupos asociados.",
                                   ),
                                   actions: [
+                                    TextButton(onPressed: () => Get.back(result: false), child: const Text("Cancelar")),
                                     TextButton(
-                                      onPressed: () => Get.back(result: false),
-                                      child: const Text("Cancelar"),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Get.back(result: true),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.red,
-                                      ),
-                                      child: const Text("Eliminar"),
-                                    ),
+                                        onPressed: () => Get.back(result: true),
+                                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                                        child: const Text("Eliminar")),
                                   ],
                                 ),
                               );
-
-                              if (confirm == true) {
-                                await controller.deleteCategoryFromList(cat.id);
-                              }
+                              if (confirm == true) await controller.deleteCategoryFromList(cat.id);
                             },
                           ),
                         ],
@@ -199,14 +172,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     : null,
                 onTap: () {
                   if (cat.id != null) {
-                    Get.to(
-                      () => GroupsPage(
-                        categoryId: cat.id!,
-                        defaultCapacity: cat.maxGroupSize ?? 1,
-                      ),
-                    );
-                  } else {
-                    print("⚠️ Category sin id!");
+                    Get.to(() => GroupsPage(categoryId: cat.id!, defaultCapacity: cat.maxGroupSize ?? 1));
                   }
                 },
               ),
@@ -214,71 +180,89 @@ class _CategoriesPageState extends State<CategoriesPage> {
           },
         );
       }),
-
-      // FAB solo para el dueño del curso
       floatingActionButton: isOwner
-    ? FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Get.dialog<Category>(
-            CategoryFormDialog(courseId: widget.courseId),
-          );
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                final result = await Get.dialog<Category>(CategoryFormDialog(courseId: widget.courseId));
+                if (result == null) return;
 
-          if (result != null) {
-            try {
-              // 1. Crear la categoría
-              await controller.addCategory(
-                courseId: result.courseId,
-                name: result.name,
-                groupingMethod: result.groupingMethod,
-                maxMembers: result.maxGroupSize ?? 1,
-              );
+                try {
+                  // 1. Crear categoría
+                  await controller.addCategory(
+                    courseId: result.courseId,
+                    name: result.name,
+                    groupingMethod: result.groupingMethod,
+                    maxMembers: result.maxGroupSize ?? 1,
+                  );
 
-              // 2. Obtener la categoría recién creada del listado del controller
-              final createdCategory = controller.categories.last;
+                  // 2. Categoría recién creada
+                  final createdCategory = controller.categories.last;
+                  if (createdCategory.id == null) return;
 
-              // 3. Obtener estudiantes inscritos en el curso
-              final userCourseController = Get.find<UserCourseController>();
-              await userCourseController.fetchCourseUsers(widget.courseId);
-              final totalStudents = userCourseController.courseUsers.length;
+                  final maxGroupSize = result.maxGroupSize ?? 1;
 
-              if (totalStudents > 0 && createdCategory.id != null) {
-                final maxGroupSize = result.maxGroupSize ?? 1;
+                  // 3. Obtener estudiantes solo si es random
+                  final userCourseController = Get.find<UserCourseController>();
+                  if (result.groupingMethod == GroupingMethod.random) {
+                    await userCourseController.fetchCourseUsers(widget.courseId);
+                  }
 
-                // 4. Calcular cuántos grupos crear
-                final groupsNeeded = (totalStudents / maxGroupSize).ceil();
+                  final totalStudents = userCourseController.courseUsers.length;
 
-                // 5. Crear los grupos automáticamente
-                final groupController = Get.find<GroupController>();
-                for (int i = 1; i <= groupsNeeded; i++) {
-                  await groupController.addGroup(
-                    createdCategory.id!,
-                    maxGroupSize,
+                  // 4. Calcular cuántos grupos crear
+                  final groupsNeeded = (totalStudents > 0 ? (totalStudents / maxGroupSize).ceil() : 1);
+
+                  // 5. Crear los grupos automáticamente
+                  final groupController = Get.find<GroupController>();
+                  for (int i = 0; i < groupsNeeded; i++) {
+                    await groupController.addGroup(createdCategory.id!, maxGroupSize);
+                  }
+
+                  // 6. Asignar estudiantes solo si es random
+                  if (result.groupingMethod == GroupingMethod.random && totalStudents > 0) {
+                    final createdGroups = groupController.groups
+                        .where((g) => g.categoryId == createdCategory.id!)
+                        .toList();
+                    final students = userCourseController.courseUsers.toList()..shuffle();
+                    int groupIndex = 0;
+                    final userGroupController = Get.find<UserGroupController>();
+
+                    for (final studentId in students) {
+                      bool added = false;
+                      while (!added) {
+                        final group = createdGroups[groupIndex % createdGroups.length];
+                        final currentMembers = await userGroupController.useCase.getGroupUsers(group.id);
+                        if (currentMembers.length < group.capacity) {
+                          await userGroupController.joinGroup(studentId, group.id, createdCategory.id!);
+                          added = true;
+                        } else {
+                          groupIndex++;
+                        }
+                      }
+                    }
+                  }
+
+                  Get.snackbar(
+                    "¡Éxito!",
+                    "Categoría '${result.name}' creada con sus grupos",
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.green[100],
+                    colorText: Colors.green[800],
+                  );
+                } catch (e) {
+                  Get.snackbar(
+                    "Error",
+                    e.toString(),
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.red[100],
+                    colorText: Colors.red[800],
                   );
                 }
-              }
-
-              Get.snackbar(
-                "¡Éxito!",
-                "Categoría '${result.name}' creada con sus grupos",
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green[100],
-                colorText: Colors.green[800],
-              );
-            } catch (e) {
-              Get.snackbar(
-                "Error",
-                e.toString(),
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red[100],
-                colorText: Colors.red[800],
-              );
-            }
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text("Crear categoría"),
-      )
-    : null,
+              },
+              icon: const Icon(Icons.add),
+              label: const Text("Crear categoría"),
+            )
+          : null,
     );
   }
 }
