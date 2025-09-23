@@ -21,14 +21,13 @@ class GroupsPage extends StatefulWidget {
 
 class _GroupsPageState extends State<GroupsPage> {
   late final GroupController controller;
-  final isOwner = false.obs; // 👈 observable para permisos
+  final isOwner = false.obs;
 
   @override
   void initState() {
     super.initState();
     controller = Get.find<GroupController>();
     controller.loadGroups(widget.categoryId);
-
     _checkOwnership();
   }
 
@@ -48,7 +47,7 @@ class _GroupsPageState extends State<GroupsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Grupos")),
+      // ❌ Sin AppBar
       body: Obx(() {
         if (controller.loading.value) {
           return const Center(child: CircularProgressIndicator());
@@ -94,16 +93,13 @@ class _GroupsPageState extends State<GroupsPage> {
                                 final confirm = await _showDeleteDialog(
                                   context,
                                 );
-                                if (confirm == true) {
+                                if (confirm == true)
                                   await controller.deleteGroup(group.id);
-                                }
                               },
                             ),
                           ],
                         )
                       : null,
-
-                  // 👇 AQUÍ LE AGREGAS EL onTap
                   onTap: () {
                     Get.to(
                       () => GroupMembersList(

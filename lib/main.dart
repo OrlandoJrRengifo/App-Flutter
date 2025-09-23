@@ -57,6 +57,13 @@ import 'features/user_groups/domain/repositories/i_user_group_repository.dart';
 import 'features/user_groups/domain/usecases/user_group_usecase.dart';
 import 'features/user_groups/ui/controller/user_group_controller.dart';
 
+// ==================== Activities ====================
+import 'features/activities/data/datasources/activity_roble_source.dart';
+import 'features/activities/data/datasources/i_activity_source.dart';
+import 'features/activities/data/repositories/activity_repository.dart';
+import 'features/activities/domain/repositories/i_activity_repository.dart';
+import 'features/activities/domain/usecases/activity_usecase.dart';
+import 'features/activities/ui/controller/activity_controller.dart';
 import 'core/i_local_preferences.dart';
 import 'core/local_preferences_shared.dart';
 
@@ -107,6 +114,12 @@ void main() async {
   Get.put<IUserGroupRepository>(UserGroupRepository(Get.find()), permanent: true);
   Get.put(UserGroupUseCase(Get.find()), permanent: true);
   Get.put(UserGroupController(Get.find()), permanent: true);
+
+  // Activities
+  Get.put<IActivityDataSource>(ActivityRobleDataSource(), permanent: true);
+  Get.lazyPut<IActivityRepository>(() => ActivityRepository(Get.find()), fenix: true);
+  Get.lazyPut(() => ActivityUseCase(Get.find()), fenix: true);
+  Get.put(ActivityController(Get.find()), permanent: true);
 
   runApp(const MyApp());
 }

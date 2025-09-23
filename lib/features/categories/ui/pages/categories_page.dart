@@ -6,7 +6,7 @@ import '../controller/categories_controller.dart';
 import '../../../courses/ui/controller/course_controller.dart';
 import '../../../auth/ui/controller/auth_controller.dart';
 import '../widgets/category_form.dart';
-import '../../../groups/ui/pages/groups_page.dart';
+import 'category_tabs_page.dart';
 import '../../../groups/ui/controller/group_controller.dart';
 import '../../../user_courses/ui/controller/user_course_controller.dart';
 import '../../../user_groups/ui/controller/user_group_controller.dart';
@@ -38,7 +38,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
     controller.loading.value = true;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final course = await coursesController.useCases.getCourse(widget.courseId);
+      final course = await coursesController.useCases.getCourse(
+        widget.courseId,
+      );
       final currentUserId = authController.currentUser.value?.id;
       if (course != null && currentUserId != null) {
         setState(() {
@@ -53,7 +55,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        if (controller.loading.value) return const Center(child: CircularProgressIndicator());
+        if (controller.loading.value)
+          return const Center(child: CircularProgressIndicator());
 
         if (controller.error.isNotEmpty) {
           return Center(
@@ -111,13 +114,20 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       ? Colors.orange[100]
                       : Colors.green[100],
                   child: Icon(
-                    cat.groupingMethod == GroupingMethod.random ? Icons.shuffle : Icons.group,
-                    color: cat.groupingMethod == GroupingMethod.random ? Colors.orange[800] : Colors.green[800],
+                    cat.groupingMethod == GroupingMethod.random
+                        ? Icons.shuffle
+                        : Icons.group,
+                    color: cat.groupingMethod == GroupingMethod.random
+                        ? Colors.orange[800]
+                        : Colors.green[800],
                   ),
                 ),
                 title: Text(
                   cat.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +137,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     Text(
                       "Método: ${cat.groupingMethod == GroupingMethod.random ? 'Aleatorio' : 'Auto-asignado'}",
                       style: TextStyle(
-                        color: cat.groupingMethod == GroupingMethod.random ? Colors.orange[700] : Colors.green[700],
+                        color: cat.groupingMethod == GroupingMethod.random
+                            ? Colors.orange[700]
+                            : Colors.green[700],
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -141,9 +153,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
                             icon: const Icon(Icons.edit, color: Colors.blue),
                             onPressed: () async {
                               final result = await Get.dialog<Category>(
-                                CategoryFormDialog(courseId: widget.courseId, category: cat),
+                                CategoryFormDialog(
+                                  courseId: widget.courseId,
+                                  category: cat,
+                                ),
                               );
-                              if (result != null) await controller.updateCategoryInList(result);
+                              if (result != null)
+                                await controller.updateCategoryInList(result);
                             },
                           ),
                           IconButton(
@@ -156,15 +172,22 @@ class _CategoriesPageState extends State<CategoriesPage> {
                                     "¿Seguro que deseas eliminar '${cat.name}'?\nEsta acción también eliminará todos los grupos asociados.",
                                   ),
                                   actions: [
-                                    TextButton(onPressed: () => Get.back(result: false), child: const Text("Cancelar")),
                                     TextButton(
-                                        onPressed: () => Get.back(result: true),
-                                        style: TextButton.styleFrom(foregroundColor: Colors.red),
-                                        child: const Text("Eliminar")),
+                                      onPressed: () => Get.back(result: false),
+                                      child: const Text("Cancelar"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Get.back(result: true),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: Colors.red,
+                                      ),
+                                      child: const Text("Eliminar"),
+                                    ),
                                   ],
                                 ),
                               );
-                              if (confirm == true) await controller.deleteCategoryFromList(cat.id);
+                              if (confirm == true)
+                                await controller.deleteCategoryFromList(cat.id);
                             },
                           ),
                         ],
@@ -172,7 +195,15 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     : null,
                 onTap: () {
                   if (cat.id != null) {
-                    Get.to(() => GroupsPage(categoryId: cat.id!, defaultCapacity: cat.maxGroupSize ?? 1));
+                    Get.to(
+                      () => CategoryTabsPage(
+                        categoryId: cat.id!,
+                        categoryName: cat.name,
+                        defaultGroupCapacity: cat.maxGroupSize ?? 1,
+                      ),
+                    );
+                  } else {
+                    print("⚠️ Category sin id!");
                   }
                 },
               ),
@@ -183,7 +214,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
       floatingActionButton: isOwner
           ? FloatingActionButton.extended(
               onPressed: () async {
-                final result = await Get.dialog<Category>(CategoryFormDialog(courseId: widget.courseId));
+                final result = await Get.dialog<Category>(
+                  CategoryFormDialog(courseId: widget.courseId),
+                );
                 if (result == null) return;
 
                 try {
@@ -204,36 +237,51 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   // 3. Obtener estudiantes solo si es random
                   final userCourseController = Get.find<UserCourseController>();
                   if (result.groupingMethod == GroupingMethod.random) {
-                    await userCourseController.fetchCourseUsers(widget.courseId);
+                    await userCourseController.fetchCourseUsers(
+                      widget.courseId,
+                    );
                   }
 
                   final totalStudents = userCourseController.courseUsers.length;
 
                   // 4. Calcular cuántos grupos crear
-                  final groupsNeeded = (totalStudents > 0 ? (totalStudents / maxGroupSize).ceil() : 1);
+                  final groupsNeeded = (totalStudents > 0
+                      ? (totalStudents / maxGroupSize).ceil()
+                      : 1);
 
                   // 5. Crear los grupos automáticamente
                   final groupController = Get.find<GroupController>();
                   for (int i = 0; i < groupsNeeded; i++) {
-                    await groupController.addGroup(createdCategory.id!, maxGroupSize);
+                    await groupController.addGroup(
+                      createdCategory.id!,
+                      maxGroupSize,
+                    );
                   }
 
                   // 6. Asignar estudiantes solo si es random
-                  if (result.groupingMethod == GroupingMethod.random && totalStudents > 0) {
+                  if (result.groupingMethod == GroupingMethod.random &&
+                      totalStudents > 0) {
                     final createdGroups = groupController.groups
                         .where((g) => g.categoryId == createdCategory.id!)
                         .toList();
-                    final students = userCourseController.courseUsers.toList()..shuffle();
+                    final students = userCourseController.courseUsers.toList()
+                      ..shuffle();
                     int groupIndex = 0;
                     final userGroupController = Get.find<UserGroupController>();
 
                     for (final studentId in students) {
                       bool added = false;
                       while (!added) {
-                        final group = createdGroups[groupIndex % createdGroups.length];
-                        final currentMembers = await userGroupController.useCase.getGroupUsers(group.id);
+                        final group =
+                            createdGroups[groupIndex % createdGroups.length];
+                        final currentMembers = await userGroupController.useCase
+                            .getGroupUsers(group.id);
                         if (currentMembers.length < group.capacity) {
-                          await userGroupController.joinGroup(studentId, group.id, createdCategory.id!);
+                          await userGroupController.joinGroup(
+                            studentId,
+                            group.id,
+                            createdCategory.id!,
+                          );
                           added = true;
                         } else {
                           groupIndex++;
