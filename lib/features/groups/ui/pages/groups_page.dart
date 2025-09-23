@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controller/group_controller.dart';
 import '../../../categories/ui/controller/categories_controller.dart';
 import '../../../courses/ui/controller/course_controller.dart';
+import '../../../user_groups/ui/pages/group_members_list.dart';
 
 class GroupsPage extends StatefulWidget {
   final String categoryId;
@@ -101,6 +102,16 @@ class _GroupsPageState extends State<GroupsPage> {
                           ],
                         )
                       : null,
+
+                  // 👇 AQUÍ LE AGREGAS EL onTap
+                  onTap: () {
+                    Get.to(
+                      () => GroupMembersList(
+                        groupId: group.id,
+                        categoryId: widget.categoryId,
+                      ),
+                    );
+                  },
                 ),
               ),
             );

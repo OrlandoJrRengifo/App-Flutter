@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../reg_to_course/ui/controller/user_course_controller.dart';
+import '../../../user_courses/ui/controller/user_course_controller.dart';
 import '../../../fake_users/ui/controller/fake_user_controller.dart';
 
 class StudentslistPage extends StatefulWidget {

@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import '../../domain/entities/course.dart';
 import '../controller/course_controller.dart';
-import '../../../reg_to_course/ui/controller/user_course_controller.dart';
+import '../../../user_courses/ui/controller/user_course_controller.dart';
 import '../../../auth/ui/controller/auth_controller.dart';
 import '../../../auth/ui/pages/login_page.dart';
 import '../widgets/course_card.dart';

@@ -8,7 +8,7 @@ import '../../../auth/ui/controller/auth_controller.dart';
 import '../widgets/category_form.dart';
 import '../../../groups/ui/pages/groups_page.dart';
 import '../../../groups/ui/controller/group_controller.dart';
-import '../../../reg_to_course/ui/controller/user_course_controller.dart';
+import '../../../user_courses/ui/controller/user_course_controller.dart';
 
 class CategoriesPage extends StatefulWidget {
   final String courseId;

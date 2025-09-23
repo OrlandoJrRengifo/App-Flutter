@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../auth/ui/controller/auth_controller.dart';
 import '../controller/course_controller.dart';
-import '../../../reg_to_course/ui/controller/user_course_controller.dart';
+import '../../../user_courses/ui/controller/user_course_controller.dart';
 import '../../domain/entities/course.dart';
 
 class JoinCourseDialog extends StatelessWidget {

@@ -18,12 +18,12 @@ import 'features/courses/data/repositories/course_repository.dart';
 import 'features/courses/ui/controller/course_controller.dart';
 
 // ==================== Inscripciones ====================
-import 'features/reg_to_course/domain/repositories/i_user_course_repository.dart';
-import 'features/reg_to_course/domain/usecases/user_course_usecase.dart';
-import 'features/reg_to_course/data/datasources/i_user_course_roble_datasource.dart';
-import 'features/reg_to_course/data/datasources/user_course_roble_datasource.dart';
-import 'features/reg_to_course/data/repositories/user_course_repository.dart';
-import 'features/reg_to_course/ui/controller/user_course_controller.dart';
+import 'features/user_courses/domain/repositories/i_user_course_repository.dart';
+import 'features/user_courses/domain/usecases/user_course_usecase.dart';
+import 'features/user_courses/data/datasources/i_user_course_roble_datasource.dart';
+import 'features/user_courses/data/datasources/user_course_roble_datasource.dart';
+import 'features/user_courses/data/repositories/user_course_repository.dart';
+import 'features/user_courses/ui/controller/user_course_controller.dart';
 
 // ==================== Autenticación ====================
 import 'features/auth/data/datasources/auth_roble_datasource.dart';
@@ -48,6 +48,14 @@ import 'features/groups/domain/repositories/i_group_repository.dart';
 import 'features/groups/data/repositories/group_repository.dart';
 import 'features/groups/domain/usecases/group_usecase.dart';
 import 'features/groups/ui/controller/group_controller.dart';
+
+// ==================== User Groups ====================
+import 'features/user_groups/data/datasources/user_group_roble_source.dart';
+import 'features/user_groups/data/datasources/i_user_group_source.dart';
+import 'features/user_groups/data/repositories/user_group_repository.dart';
+import 'features/user_groups/domain/repositories/i_user_group_repository.dart';
+import 'features/user_groups/domain/usecases/user_group_usecase.dart';
+import 'features/user_groups/ui/controller/user_group_controller.dart';
 
 import 'core/i_local_preferences.dart';
 import 'core/local_preferences_shared.dart';
@@ -93,6 +101,12 @@ void main() async {
   Get.put<IGroupRepository>(GroupRepository(Get.find()), permanent: true);
   Get.put(GroupUseCase(Get.find()), permanent: true);  
   Get.put(GroupController(Get.find()), permanent: true);
+
+  // ==================== User Groups ====================
+  Get.put<IUserGroupDataSource>(UserGroupRobleDataSource(), permanent: true);
+  Get.put<IUserGroupRepository>(UserGroupRepository(Get.find()), permanent: true);
+  Get.put(UserGroupUseCase(Get.find()), permanent: true);
+  Get.put(UserGroupController(Get.find()), permanent: true);
 
   runApp(const MyApp());
 }
