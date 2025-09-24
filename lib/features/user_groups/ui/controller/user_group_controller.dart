@@ -80,6 +80,11 @@ class UserGroupController extends GetxController {
     groupUsers.assignAll(users);
   }
 
+  Future<List<String>> getGroupUsers(String groupId) async {
+    final users = await useCase.getGroupUsers(groupId);
+    return users;
+  }
+
   Future<bool> isUserInCategory(String userId, String categoryId) async {
     final groupId = await useCase.getUserGroupInCategory(userId, categoryId);
     return groupId != null;
