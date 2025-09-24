@@ -11,6 +11,7 @@ class CourseUseCases {
     required String code,
     required String teacherId,
     required int maxStudents,
+    DateTime? createdAt,
   }) async {
     // Limite de 3 cursos por usuario
     final currentCount = await repository.countByTeacher(teacherId);
@@ -24,6 +25,7 @@ class CourseUseCases {
         code: code,
         teacherId: teacherId,
         maxStudents: maxStudents,
+        createdAt: createdAt,
       ),
     );
   }

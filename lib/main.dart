@@ -31,7 +31,7 @@ import 'features/auth/data/datasources/i_auth_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_usecase.dart';
 import 'features/auth/ui/controller/auth_controller.dart';
-import 'features/auth/ui/pages/session_check_screen.dart'; // ✅ Nuevo import
+import 'features/auth/ui/pages/session_check_screen.dart'; 
 
 // ==================== FakeUser ====================
 import 'features/fake_users/data/datasources/fake_user_roble_source.dart';
@@ -136,7 +136,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const SessionCheckScreen(), // ✅ Cambio principal aquí
+      home: const SessionCheckScreen(), 
       debugShowCheckedModeBanner: false,
     );
   }
