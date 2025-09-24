@@ -101,8 +101,8 @@ class AssessmentController extends GetxController {
   Future<List<Assessment>> getAssessmentsByActivityAndToRate(String activityId, String toRate) =>
       useCase.getAssessmentsByActivityAndToRate(activityId, toRate);
 
-  Future<Map<String, double>> getAverageRatings(String activityId, String rater) async {
-    final list = await getAssessmentsByActivityAndRater(activityId, rater);
+  Future<Map<String, double>> getAverageRatings(String activityId, String userId) async {
+    final list = await getAssessmentsByActivityAndToRate(activityId, userId);
 
     if (list.isEmpty) {
       return {
