@@ -15,20 +15,20 @@ class AuthenticationController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    logInfo('AuthenticationController initialized');
   }
 
   Future<bool> login(String email, String password) async {
     final user = await _authUseCase.login(email, password);
 
     if (user != null) {
-      // ✅ paso adicional: verificar FakeUser
-      final fakeUserController = Get.find<FakeUserController>();
-      await fakeUserController.createUserIfNotExists(
-        authId: user.id ?? "",
-        email: user.email,
-        name: user.name,
-      );
+      try {
+        final fakeUserController = Get.find<FakeUserController>();
+        await fakeUserController.createUserIfNotExists(
+          authId: user.id ?? "",
+          email: user.email,
+          name: user.name,
+        );
+      } catch (_) {}
 
       currentUser.value = user;
       return true;
@@ -38,12 +38,13 @@ class AuthenticationController extends GetxController {
 
   Future<bool> signUp(String email, String name, String password) async {
     logInfo('AuthenticationController: Sign Up $email');
-    final result = await _authUseCase.signUp(email, name, password);
-    return result;
+    return await _authUseCase.signUp(email, name, password);
   }
 
   Future<void> logOut() async {
     await _authUseCase.logOut();
     currentUser.value = null;
+
   }
+
 }
