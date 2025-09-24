@@ -1,3 +1,4 @@
+// features/assessments/data/datasources/assessment_roble_source.dart
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -31,6 +32,7 @@ class AssessmentRobleDataSource implements IAssessmentDataSource {
       final list = jsonDecode(res.body) as List;
       return list.map((e) => Assessment.fromMap(e)).toList();
     }
+    print("getAssessmentsByActivity failed: ${res.statusCode} ${res.body}");
     return [];
   }
 
@@ -50,6 +52,7 @@ class AssessmentRobleDataSource implements IAssessmentDataSource {
       final list = jsonDecode(res.body) as List;
       return list.map((e) => Assessment.fromMap(e)).toList();
     }
+    print("getAssessmentsByActivityAndRater failed: ${res.statusCode} ${res.body}");
     return [];
   }
 
@@ -69,18 +72,24 @@ class AssessmentRobleDataSource implements IAssessmentDataSource {
       final list = jsonDecode(res.body) as List;
       return list.map((e) => Assessment.fromMap(e)).toList();
     }
+    print("getAssessmentsByActivityAndToRate failed: ${res.statusCode} ${res.body}");
     return [];
   }
 
   @override
   Future<bool> createAssessment(Assessment assessment) async {
     final token = await _getToken();
-    if (token == null) return false;
+    if (token == null) {
+      print("createAssessment: token null");
+      return false;
+    }
 
     final body = {
       "tableName": "assessments",
       "records": [assessment.toMap()],
     };
+
+    print("📡 createAssessment body: ${jsonEncode(body)}");
 
     final res = await httpClient.post(
       Uri.parse("$baseUrl/insert"),
@@ -91,7 +100,20 @@ class AssessmentRobleDataSource implements IAssessmentDataSource {
       body: jsonEncode(body),
     );
 
-    return res.statusCode == 200 || res.statusCode == 201;
+    print("📡 createAssessment response: ${res.statusCode} ${res.body}");
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      final data = jsonDecode(res.body);
+      if ((data["inserted"] as List).isNotEmpty) {
+        return true;
+      } else {
+        // Puede que haya skipped por validación, mostrar motivos
+        print("createAssessment skipped: ${data["skipped"]}");
+        return false;
+      }
+    }
+
+    return false;
   }
 
   @override
@@ -119,6 +141,10 @@ class AssessmentRobleDataSource implements IAssessmentDataSource {
       },
       body: jsonEncode(body),
     );
+
+    if (res.statusCode != 200) {
+      print("gradeAssessment failed: ${res.statusCode} ${res.body}");
+    }
 
     return res.statusCode == 200;
   }

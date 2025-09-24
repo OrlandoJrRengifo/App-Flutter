@@ -10,6 +10,7 @@ class AssessmentController extends GetxController {
 
   final RxList<Assessment> assessments = <Assessment>[].obs;
 
+  /// Crea assessments para una actividad (múltiples)
   Future<void> createAssessmentsForActivity({
     required String activityId,
     required List<String> groupIds,
@@ -31,7 +32,7 @@ class AssessmentController extends GetxController {
               activityId: activityId,
               rater: users[i],
               toRate: users[j],
-              timeWin: timeWin,
+              timeWin: timeWin, // ✅ se pasa tal cual
               visibility: visibility,
             ),
           );
@@ -39,10 +40,34 @@ class AssessmentController extends GetxController {
       }
     }
 
-    // Crear todos los assessments de manera secuencial pero sin doble await anidado
     for (final assessment in toCreate) {
-      await useCase.createAssessment(assessment);
+      final ok = await useCase.createAssessment(assessment);
+      if (!ok) {
+        print("Warning: createAssessment returned false for ${assessment.toMap()}");
+      }
     }
+  }
+
+  /// Crea solo 1 assessment
+  Future<bool> createAssessment({
+    required String activityId,
+    required String rater,
+    required String toRate,
+    required TimeOfDay? timeWin,
+    required String visibility,
+  }) async {
+    final a = Assessment(
+      activityId: activityId,
+      rater: rater,
+      toRate: toRate,
+      timeWin: timeWin, // ✅ se pasa tal cual
+      visibility: visibility,
+    );
+
+    print("AssessmentController.createAssessment -> ${a.toMap()}");
+    final res = await useCase.createAssessment(a);
+    print("AssessmentController.createAssessment result -> $res");
+    return res;
   }
 
   Future<bool> gradeAssessment(
@@ -70,16 +95,13 @@ class AssessmentController extends GetxController {
   Future<List<Assessment>> getAssessmentsByActivity(String activityId) =>
       useCase.getAssessmentsByActivity(activityId);
 
-  Future<List<Assessment>> getAssessmentsByActivityAndRater(
-          String activityId, String rater) =>
+  Future<List<Assessment>> getAssessmentsByActivityAndRater(String activityId, String rater) =>
       useCase.getAssessmentsByActivityAndRater(activityId, rater);
 
-  Future<List<Assessment>> getAssessmentsByActivityAndToRate(
-          String activityId, String toRate) =>
+  Future<List<Assessment>> getAssessmentsByActivityAndToRate(String activityId, String toRate) =>
       useCase.getAssessmentsByActivityAndToRate(activityId, toRate);
 
-  Future<Map<String, double>> getAverageRatings(
-      String activityId, String rater) async {
+  Future<Map<String, double>> getAverageRatings(String activityId, String rater) async {
     final list = await getAssessmentsByActivityAndRater(activityId, rater);
 
     if (list.isEmpty) {

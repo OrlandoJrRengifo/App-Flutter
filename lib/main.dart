@@ -67,6 +67,14 @@ import 'features/activities/ui/controller/activity_controller.dart';
 import 'core/i_local_preferences.dart';
 import 'core/local_preferences_shared.dart';
 
+// ==================== Assessments ====================
+import 'features/assessments/data/datasources/i_assessment_source.dart';
+import 'features/assessments/data/datasources/assessment_roble_source.dart';
+import 'features/assessments/data/repositories/assessment_repository.dart';
+import 'features/assessments/domain/repositories/i_assessment_repository.dart';
+import 'features/assessments/domain/usecases/assessment_usecase.dart';
+import 'features/assessments/ui/controller/assessment_controller.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -122,6 +130,12 @@ void main() async {
   Get.lazyPut<IActivityRepository>(() => ActivityRepository(Get.find()), fenix: true);
   Get.lazyPut(() => ActivityUseCase(Get.find()), fenix: true);
   Get.put(ActivityController(Get.find()), permanent: true);
+
+  // ==================== Assessments ====================
+  Get.put<IAssessmentDataSource>(AssessmentRobleDataSource(), permanent: true);
+  Get.put<IAssessmentRepository>(AssessmentRepository(Get.find()), permanent: true);
+  Get.put(AssessmentUseCase(Get.find()), permanent: true);
+  Get.put(AssessmentController(Get.find()), permanent: true);
 
   runApp(const MyApp());
 }
