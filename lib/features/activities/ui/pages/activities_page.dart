@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/features/auth/ui/controller/auth_controller.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/activity.dart';
 import '../controller/activity_controller.dart';
@@ -7,6 +8,7 @@ import '../../../courses/ui/controller/course_controller.dart';
 import '../../../groups/ui/controller/group_controller.dart';
 import '../../../assessments/ui/controller/assessment_controller.dart';
 import '../../../user_groups/ui/controller/user_group_controller.dart';
+import '../../../assessments/ui/pages/assessment_list_page.dart';
 
 class ActivitiesPage extends StatefulWidget {
   final String categoryId;
@@ -313,6 +315,18 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
                 title: Text(activity.name),
                 subtitle: Text(activity.activated ? "Activada" : "Inactiva"),
                 trailing: _buildActionButtons(activity),
+                onTap: () {
+                  if (!isOwner.value && activity.activated) {
+                    final currentUserId =
+                        Get.find<AuthenticationController>().currentUser.value!.id!;
+                    Get.to(
+                      () => AssessmentListPage(
+                        activityId: activity.id!,
+                        currentUserId: currentUserId,
+                      ),
+                    );
+                  }
+                },
               ),
             );
           },

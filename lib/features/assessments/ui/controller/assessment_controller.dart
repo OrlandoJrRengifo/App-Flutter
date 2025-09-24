@@ -43,7 +43,9 @@ class AssessmentController extends GetxController {
     for (final assessment in toCreate) {
       final ok = await useCase.createAssessment(assessment);
       if (!ok) {
-        print("Warning: createAssessment returned false for ${assessment.toMap()}");
+        print(
+          "Warning: createAssessment returned false for ${assessment.toMap()}",
+        );
       }
     }
   }
@@ -95,13 +97,20 @@ class AssessmentController extends GetxController {
   Future<List<Assessment>> getAssessmentsByActivity(String activityId) =>
       useCase.getAssessmentsByActivity(activityId);
 
-  Future<List<Assessment>> getAssessmentsByActivityAndRater(String activityId, String rater) =>
-      useCase.getAssessmentsByActivityAndRater(activityId, rater);
+  Future<List<Assessment>> getAssessmentsByActivityAndRater(
+    String activityId,
+    String rater,
+  ) => useCase.getAssessmentsByActivityAndRater(activityId, rater);
 
-  Future<List<Assessment>> getAssessmentsByActivityAndToRate(String activityId, String toRate) =>
-      useCase.getAssessmentsByActivityAndToRate(activityId, toRate);
+  Future<List<Assessment>> getAssessmentsByActivityAndToRate(
+    String activityId,
+    String toRate,
+  ) => useCase.getAssessmentsByActivityAndToRate(activityId, toRate);
 
-  Future<Map<String, double>> getAverageRatings(String activityId, String userId) async {
+  Future<Map<String, double>> getAverageRatings(
+    String activityId,
+    String userId,
+  ) async {
     final list = await getAssessmentsByActivityAndToRate(activityId, userId);
 
     if (list.isEmpty) {
@@ -129,13 +138,15 @@ class AssessmentController extends GetxController {
     double avgPunctuality =
         rated.map((a) => a.punctuality!).reduce((a, b) => a + b) / rated.length;
     double avgContributions =
-        rated.map((a) => a.contributions!).reduce((a, b) => a + b) / rated.length;
+        rated.map((a) => a.contributions!).reduce((a, b) => a + b) /
+        rated.length;
     double avgCommitment =
         rated.map((a) => a.commitment!).reduce((a, b) => a + b) / rated.length;
     double avgAttitude =
         rated.map((a) => a.attitude!).reduce((a, b) => a + b) / rated.length;
 
-    double general = (avgPunctuality + avgContributions + avgCommitment + avgAttitude) / 4;
+    double general =
+        (avgPunctuality + avgContributions + avgCommitment + avgAttitude) / 4;
 
     return {
       "punctuality": avgPunctuality,
