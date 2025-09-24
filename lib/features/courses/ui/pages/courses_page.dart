@@ -115,7 +115,7 @@ class _CourseDashboardState extends State<CourseDashboard>
   }
 
   PreferredSizeWidget _buildAppBar() => AppBar(
-        title: const Text("Proyecto Flutter"),
+        title: const Text("JC academy"),
         actions: [
           OutlinedButton.icon(
             onPressed: () {
