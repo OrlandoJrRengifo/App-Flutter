@@ -31,7 +31,7 @@ import 'features/auth/data/datasources/i_auth_source.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
 import 'features/auth/domain/usecases/auth_usecase.dart';
 import 'features/auth/ui/controller/auth_controller.dart';
-import 'features/auth/ui/pages/login_page.dart';
+import 'features/auth/ui/pages/session_check_screen.dart'; // ✅ Nuevo import
 
 // ==================== FakeUser ====================
 import 'features/fake_users/data/datasources/fake_user_roble_source.dart';
@@ -64,7 +64,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // implementación SharedPreferences para el token
-  Get.put<ILocalPreferences>(LocalPreferencesShared(), permanent: true);
+    await Get.putAsync<ILocalPreferences>(
+    () async => LocalPreferencesShared.init(),
+  );
 
   // ==================== Autenticación ====================
   Get.put<IAuthenticationSource>(AuthRobleSource(), permanent: true);
@@ -121,7 +123,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const LoginPage(),
+      home: const SessionCheckScreen(), // ✅ Cambio principal aquí
+      debugShowCheckedModeBanner: false,
     );
   }
 }

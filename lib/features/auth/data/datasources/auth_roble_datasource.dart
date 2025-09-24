@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../../../../core/i_local_preferences.dart';
 import '../../domain/entities/user.dart';
-//import '../../../courses/data/datasources/course_roble_datasource.dart';
 import 'i_auth_source.dart';
 
 class AuthRobleSource implements IAuthenticationSource {
@@ -15,6 +14,7 @@ class AuthRobleSource implements IAuthenticationSource {
 
   String? _accessToken;
   String? _refreshToken;
+  final ILocalPreferences _sharedPreferences = Get.find<ILocalPreferences>();
 
   AuthRobleSource({http.Client? client}) : httpClient = client ?? http.Client();
 
@@ -30,18 +30,16 @@ class AuthRobleSource implements IAuthenticationSource {
       final data = jsonDecode(response.body);
       final userData = data['user'];
 
-      // ✅ Guardamos tokens
       _accessToken = data['accessToken'];
       _refreshToken = data['refreshToken'];
-      final ILocalPreferences sharedPreferences = Get.find();
-      sharedPreferences.storeData('token', _accessToken);
-      sharedPreferences.storeData('refreshToken', _refreshToken);
+      await _sharedPreferences.storeData('token', _accessToken);
+      await _sharedPreferences.storeData('refreshToken', _refreshToken);
 
-      // ✅ devolvemos un User normal (solo Auth)
       return User.fromJson(userData);
     } else {
       final body = jsonDecode(response.body);
       logError("Login error ${response.statusCode}: ${body['message']}");
+      print('❌ Login fallido: ${body['message']}');
       return null;
     }
   }
@@ -57,10 +55,6 @@ class AuthRobleSource implements IAuthenticationSource {
         "name": user.name,
       }),
     );
-
-    print("🔎 SignUp response: ${response.statusCode}");
-    print("🔎 SignUp body: ${response.body}");
-
     if (response.statusCode == 201 || response.statusCode == 200) {
       return true;
     }
@@ -69,7 +63,12 @@ class AuthRobleSource implements IAuthenticationSource {
 
   @override
   Future<bool> logOut() async {
-    if (_accessToken == null) return true;
+    _accessToken ??= await _sharedPreferences.retrieveData<String>('token');
+
+    if (_accessToken == null) {
+      return true;
+    }
+
     final response = await httpClient.post(
       Uri.parse("$baseUrl/logout"),
       headers: {
@@ -78,9 +77,13 @@ class AuthRobleSource implements IAuthenticationSource {
       },
     );
 
-    logInfo("Logout status: ${response.statusCode}");
     _accessToken = null;
     _refreshToken = null;
+    await _sharedPreferences.removeData('token');
+    await _sharedPreferences.removeData('refreshToken');
+    await _sharedPreferences.removeData('email');
+    await _sharedPreferences.removeData('password');
+    await _sharedPreferences.storeData('remember_me', false);
 
     return response.statusCode == 200;
   }
@@ -117,7 +120,13 @@ class AuthRobleSource implements IAuthenticationSource {
     return Future.value(true);
   }
 
+  // ✅ Método mejorado para refrescar token
   Future<bool> refreshToken() async {
+    // Cargar refresh token desde storage si no está en memoria
+    _refreshToken ??= await _sharedPreferences.retrieveData<String>(
+      'refreshToken',
+    );
+
     if (_refreshToken == null) return false;
 
     final response = await httpClient.post(
@@ -131,20 +140,46 @@ class AuthRobleSource implements IAuthenticationSource {
       final data = jsonDecode(response.body);
       _accessToken = data['accessToken'];
       _refreshToken = data['refreshToken'];
+
+      // ✅ Guardar nuevos tokens
+      await _sharedPreferences.storeData('token', _accessToken);
+      await _sharedPreferences.storeData('refreshToken', _refreshToken);
+
       return true;
     }
     return false;
   }
 
+  // ✅ Método mejorado para validar token
   Future<bool> validateToken() async {
+    // Cargar token desde storage si no está en memoria
+    _accessToken ??= await _sharedPreferences.retrieveData<String>('token');
+
     if (_accessToken == null) return false;
 
-    final response = await httpClient.get(
-      Uri.parse("$baseUrl/validate"),
-      headers: {'Authorization': 'Bearer $_accessToken'},
-    );
+    try {
+      final response = await httpClient.get(
+        Uri.parse("$baseUrl/validate"),
+        headers: {'Authorization': 'Bearer $_accessToken'},
+      );
 
-    return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        return true;
+      } else if (response.statusCode == 401) {
+        // Token expirado, intentar refrescar
+        logInfo("Token expired, attempting refresh...");
+        final refreshed = await refreshToken();
+        if (refreshed) {
+          // Validar nuevamente con el token refrescado
+          return await validateToken();
+        }
+      }
+
+      return false;
+    } catch (e) {
+      logError("Error validating token: $e");
+      return false;
+    }
   }
 
   Future<bool> verifyToken(String token) async {
@@ -155,5 +190,36 @@ class AuthRobleSource implements IAuthenticationSource {
     );
 
     return response.statusCode == 200;
+  }
+
+  // ✅ Método para obtener el usuario actual (opcional)
+  Future<User?> getCurrentUser() async {
+    _accessToken ??= await _sharedPreferences.retrieveData<String>('token');
+
+    if (_accessToken == null) return null;
+
+    try {
+      final response = await httpClient.get(
+        Uri.parse("$baseUrl/me"), // Asumiendo que existe este endpoint
+        headers: {'Authorization': 'Bearer $_accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return User.fromJson(data);
+      }
+    } catch (e) {
+      logError("Error getting current user: $e");
+    }
+
+    return null;
+  }
+
+  // ✅ Método para inicializar tokens desde storage
+  Future<void> initializeFromStorage() async {
+    _accessToken = await _sharedPreferences.retrieveData<String>('token');
+    _refreshToken = await _sharedPreferences.retrieveData<String>(
+      'refreshToken',
+    );
   }
 }
