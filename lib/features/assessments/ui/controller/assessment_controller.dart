@@ -17,23 +17,31 @@ class AssessmentController extends GetxController {
     required String visibility,
   }) async {
     final userGroupController = Get.find<UserGroupController>();
+    final List<Assessment> toCreate = [];
 
     for (final groupId in groupIds) {
       final users = await userGroupController.getGroupUsers(groupId);
 
+      // Generar todas las combinaciones de rater y toRate
       for (var i = 0; i < users.length; i++) {
         for (var j = 0; j < users.length; j++) {
           if (i == j) continue;
-          final assessment = Assessment(
-            activityId: activityId,
-            rater: users[i],
-            toRate: users[j],
-            timeWin: timeWin,
-            visibility: visibility,
+          toCreate.add(
+            Assessment(
+              activityId: activityId,
+              rater: users[i],
+              toRate: users[j],
+              timeWin: timeWin,
+              visibility: visibility,
+            ),
           );
-          await useCase.createAssessment(assessment);
         }
       }
+    }
+
+    // Crear todos los assessments de manera secuencial pero sin doble await anidado
+    for (final assessment in toCreate) {
+      await useCase.createAssessment(assessment);
     }
   }
 
