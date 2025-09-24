@@ -65,7 +65,7 @@ class _SessionCheckScreenState extends State<SessionCheckScreen> {
 
               // Título
               Text(
-                'Sistema de Cursos',
+                'JC academy',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
