@@ -9,6 +9,7 @@ import '../../../groups/ui/controller/group_controller.dart';
 import '../../../assessments/ui/controller/assessment_controller.dart';
 import '../../../user_groups/ui/controller/user_group_controller.dart';
 import '../../../assessments/ui/pages/assessment_list_page.dart';
+import '../../../assessments/ui/pages/assessments_stats_page.dart';
 
 class ActivitiesPage extends StatefulWidget {
   final String categoryId;
@@ -316,9 +317,17 @@ class _ActivitiesPageState extends State<ActivitiesPage> {
                 subtitle: Text(activity.activated ? "Activada" : "Inactiva"),
                 trailing: _buildActionButtons(activity),
                 onTap: () {
-                  if (!isOwner.value && activity.activated) {
-                    final currentUserId =
-                        Get.find<AuthenticationController>().currentUser.value!.id!;
+                  if (!activity.activated) return;
+
+                  if (isOwner.value) {
+                    // 🔹 Profesor: ver estadísticas
+                    Get.to(() => AssessmentsStatsPage(activityId: activity.id!));
+                  } else {
+                    // 🔹 Estudiante: ver cuestionario de calificación
+                    final currentUserId = Get.find<AuthenticationController>()
+                        .currentUser
+                        .value!
+                        .id!;
                     Get.to(
                       () => AssessmentListPage(
                         activityId: activity.id!,
