@@ -57,7 +57,7 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
 
   @override
   Future<CourseModel?> getById(String id) async {
-    print(  "Obteniendo curso por ID: $id");
+    print("Obteniendo curso por ID: $id");
     final uri = Uri.parse(
       "$baseUrl/read",
     ).replace(queryParameters: {"tableName": "courses", "_id": id});
@@ -101,7 +101,6 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
 
   @override
   Future<CourseModel> update(CourseModel course) async {
-    
     if (course.id == null) {
       throw Exception("❌ Se requiere ID para actualizar");
     }
@@ -207,5 +206,50 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
       logError("❌ Error en GetByCode: ${response.body}");
     }
     return null;
+  }
+
+  Future<int> getAvailableSlots(String courseId) async {
+    final ILocalPreferences prefs = Get.find();
+    final token = await prefs.retrieveData<String>('token');
+
+    // 1. Obtener el curso
+    final courseUri = Uri.parse(
+      "$baseUrl/read",
+    ).replace(queryParameters: {"tableName": "courses", "_id": courseId});
+
+    final courseResponse = await httpClient.get(
+      courseUri,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (courseResponse.statusCode != 200) {
+      throw Exception("❌ Error al leer curso: ${courseResponse.body}");
+    }
+
+    final courseData = jsonDecode(courseResponse.body) as List;
+    if (courseData.isEmpty) throw Exception("⚠️ Curso no encontrado");
+
+    final maxStudents =
+        int.tryParse(courseData.first["max_students"].toString()) ?? 0;
+
+    // 2. Contar inscritos
+    final groupsUri = Uri.parse("$baseUrl/read").replace(
+      queryParameters: {"tableName": "user_courses", "course_id": courseId},
+    );
+
+    final groupsResponse = await httpClient.get(
+      groupsUri,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (groupsResponse.statusCode != 200 && groupsResponse.statusCode != 201) {
+      throw Exception("Error al leer user_courses: ${groupsResponse.body}");
+    }
+
+    final enrolledData = jsonDecode(groupsResponse.body) as List;
+    final enrolled = enrolledData.length;
+
+    // 3. Retornar cupos disponibles
+    return maxStudents - enrolled;
   }
 }

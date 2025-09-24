@@ -17,4 +17,8 @@ class UserCourseRepository implements IUserCourseRepository {
   @override
   Future<List<String>> getCourseUsers(String courseId) =>
       robleDataSource.getCourseUsers(courseId);
+      
+  @override
+  Future<bool> isUserInCourse(String userId, String courseId) =>
+      robleDataSource.isUserInCourse(userId, courseId);
 }

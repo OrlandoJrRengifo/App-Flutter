@@ -222,4 +222,5 @@ class CoursesController extends GetxController {
   return course.teacherId != user.id;
 }
 
+
 }
