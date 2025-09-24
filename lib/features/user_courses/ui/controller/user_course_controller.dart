@@ -22,4 +22,8 @@ class UserCourseController extends GetxController {
     final users = await useCase.getCourseUsers(courseId);
     courseUsers.assignAll(users);
   }
+
+  Future<bool> isUserInCourse(String userId, String courseId) async {
+    return await useCase.isUserInCourse(userId, courseId);
+  }
 }

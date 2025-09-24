@@ -29,7 +29,10 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     _sharedPreferences = Get.find<ILocalPreferences>();
-    _loadSavedCredentials();
+     final rememberMe =  _sharedPreferences.retrieveData<bool>('remember_me');
+     if(rememberMe == true){
+      _loadSavedCredentials();
+     }
   }
 
   Future<void> _loadSavedCredentials() async {
