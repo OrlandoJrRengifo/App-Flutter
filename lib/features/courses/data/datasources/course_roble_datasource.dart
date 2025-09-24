@@ -29,7 +29,7 @@ class CourseRobleDataSource implements ICourseRobleDataSource {
           "name": course.name,
           "code": course.code,
           "teacher_id": course.teacherId,
-          "created_at": course.createdAt,
+          "created_at": course.createdAt?.toIso8601String(),
           "max_students": course.maxStudents,
         },
       ],

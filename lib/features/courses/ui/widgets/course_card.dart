@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // 👈 Para copiar al portapapeles
+import 'package:flutter/services.dart'; 
 import 'package:get/get.dart';
 import '../../domain/entities/course.dart';
 import '../pages/course_detail_page.dart';
@@ -88,12 +88,19 @@ class CourseCard extends StatelessWidget {
                   ),
                 ],
               ),
+              
               Text("Cupos: ${course.maxStudents}"),
               Text(formattedDate),
+              
             ],
+            
           ),
+          
         ),
+        
       ),
+      
     );
+    
   }
 }
