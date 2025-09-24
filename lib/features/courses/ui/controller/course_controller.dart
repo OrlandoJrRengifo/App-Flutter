@@ -87,6 +87,7 @@ class CoursesController extends GetxController {
     required String name,
     required String code,
     required int maxStudents,
+    DateTime? createdAt,
   }) async {
     final userId = _authController.currentUser.value?.id;
     if (userId == null) {
@@ -103,7 +104,10 @@ class CoursesController extends GetxController {
         code: code,
         teacherId: userId,
         maxStudents: maxStudents,
+        createdAt: createdAt,
       );
+
+      print("➕ Creado curso: ${newCourse.name} | maxStudents=${newCourse.maxStudents}");
 
       courses.add(newCourse);
       print("✅ Curso agregado: ${newCourse.name}");

@@ -11,17 +11,25 @@ class CourseModel extends Course {
   });
 
   factory CourseModel.fromMap(Map<String, dynamic> m) {
+    final parsedMax = m['max_students'] != null
+        ? int.tryParse(m['max_students'].toString()) ?? 0
+        : 0;
+
+    print(
+      "📦 fromMap → name=${m['name']} | max_students=${m['max_students']} | parsed=$parsedMax",
+    );
+
     return CourseModel(
-      id: m['_id']?.toString(), 
+      id: m['_id']?.toString(),
       name: m['name'] as String,
       code: m['code'] as String,
-      teacherId: m['teacher_id'] as String, 
-      maxStudents: m['maxStudents'] != null
-          ? int.tryParse(m['maxStudents'].toString()) ?? 0
-          : 0,
+      teacherId: m['teacher_id'] as String,
       createdAt: m['created_at'] != null && m['created_at'] != "null"
           ? DateTime.tryParse(m['created_at'].toString())
           : null,
+      maxStudents: m['max_students'] != null
+          ? int.tryParse(m['max_students'].toString()) ?? 0
+          : 0,
     );
   }
 
@@ -30,7 +38,8 @@ class CourseModel extends Course {
       'name': name,
       'code': code,
       'teacher_id': teacherId,
-      'maxStudents': maxStudents,
+      'max_students': maxStudents,
+      'created_at': createdAt?.toIso8601String(),
     };
     if (id != null) map['_id'] = id;
     return map;

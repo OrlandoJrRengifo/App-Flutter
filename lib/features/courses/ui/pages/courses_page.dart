@@ -61,7 +61,6 @@ class _CourseDashboardState extends State<CourseDashboard>
     super.dispose();
   }
 
-  // 👉 Crear curso
   Future<void> _createCourse() async {
     if (!await courseController.canCreateMore()) {
       Get.snackbar("Límite alcanzado", "No puedes crear más de 3 cursos");
@@ -73,12 +72,12 @@ class _CourseDashboardState extends State<CourseDashboard>
         name: result.name,
         code: result.code,
         maxStudents: result.maxStudents,
+        createdAt:  DateTime.now(),
       );
       Get.snackbar("¡Éxito!", "Curso '${result.name}' creado correctamente");
     }
   }
 
-  // 👉 Editar curso
   Future<void> _editCourse(Course course) async {
     final result = await Get.dialog<Course>(CourseFormDialog(course: course));
     if (result != null) {
@@ -87,7 +86,6 @@ class _CourseDashboardState extends State<CourseDashboard>
     }
   }
 
-  // 👉 Eliminar curso
   Future<void> _deleteCourse(Course course) async {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
@@ -174,6 +172,7 @@ class _CourseDashboardState extends State<CourseDashboard>
                     onEdit: _editCourse,
                     onDelete: _deleteCourse,
                   ),
+                  
                 );
               }),
             ),
