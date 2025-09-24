@@ -63,7 +63,7 @@ class AuthRobleSource implements IAuthenticationSource {
 
   @override
   Future<bool> logOut() async {
-    _accessToken ??= await _sharedPreferences.retrieveData<String>('token');
+     _accessToken = await _sharedPreferences.retrieveData<String>('token');
 
     if (_accessToken == null) {
       return true;
@@ -154,6 +154,7 @@ class AuthRobleSource implements IAuthenticationSource {
   Future<bool> validateToken() async {
     // Cargar token desde storage si no está en memoria
     _accessToken ??= await _sharedPreferences.retrieveData<String>('token');
+    
 
     if (_accessToken == null) return false;
 

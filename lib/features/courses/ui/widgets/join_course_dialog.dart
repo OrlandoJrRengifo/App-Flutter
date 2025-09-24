@@ -24,15 +24,15 @@ class JoinCourseDialog extends StatelessWidget {
         decoration: const InputDecoration(labelText: "Código"),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text("Cancelar"),
-        ),
+        TextButton(onPressed: () => Get.back(), child: const Text("Cancelar")),
         ElevatedButton(
           onPressed: () async {
             final code = codeController.text.trim();
             if (code.isEmpty) {
-              Get.snackbar("Código requerido", "Debes ingresar un código de curso");
+              Get.snackbar(
+                "Código requerido",
+                "Debes ingresar un código de curso",
+              );
               return;
             }
 
@@ -44,11 +44,29 @@ class JoinCourseDialog extends StatelessWidget {
               // 🚫 Validar que el usuario no sea el creador del curso
               final isOwner = await courseController.isOwnerOfCourse(courseId);
               if (isOwner) {
-                Get.snackbar("Acceso denegado", "No puedes inscribirte a tu propio curso");
+                Get.snackbar(
+                  "Acceso denegado",
+                  "No puedes inscribirte a tu propio curso",
+                );
+                return;
+              }
+              final alreadyEnrolled = await userCourseController.isUserInCourse(
+                userId,
+                courseId,
+              );
+
+              if (alreadyEnrolled) {
+                Get.snackbar(
+                  "Acceso denegado",
+                  "Ya estás inscrito en este curso",
+                );
                 return;
               }
 
-              final success = await userCourseController.enrollUser(userId, courseId);
+              final success = await userCourseController.enrollUser(
+                userId,
+                courseId,
+              );
               if (success) {
                 await userCourseController.fetchUserCourses(userId);
                 final enrolled = await courseController.loadCoursesByIds(
@@ -56,9 +74,12 @@ class JoinCourseDialog extends StatelessWidget {
                 );
                 onJoinSuccess(enrolled);
                 Get.back();
-                Get.snackbar("¡Éxito!", "Te has inscrito al curso correctamente");
+                Get.snackbar(
+                  "¡Éxito!",
+                  "Te has inscrito al curso correctamente",
+                );
               } else {
-                Get.snackbar("Error", "No se pudo inscribir al curso");
+                Get.snackbar("Error", "Ya no quedan cupos para este curso");
               }
             } else {
               Get.snackbar("Error", "Código inválido o sesión no válida");

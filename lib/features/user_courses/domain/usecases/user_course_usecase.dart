@@ -13,4 +13,7 @@ class UserCourseUseCase {
 
   Future<List<String>> getCourseUsers(String courseId) =>
       repository.getCourseUsers(courseId);
+  Future<bool> isUserInCourse(String userId, String courseId) =>
+      repository.isUserInCourse(userId, courseId);
+      
 }
