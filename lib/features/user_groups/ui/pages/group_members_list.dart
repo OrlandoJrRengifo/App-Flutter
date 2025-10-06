@@ -56,11 +56,17 @@ class _GroupMembersListState extends State<GroupMembersList> {
 
     // Carga de curso y verificación de teacher
     final courseIdFuture = categoryController.getCourseId(widget.categoryId);
-    final groupUsersFuture = userGroupController.fetchGroupUsers(widget.groupId);
-    final inCategoryFuture = userGroupController.isUserInCategory(currentUserId, widget.categoryId);
+    final groupUsersFuture = userGroupController.fetchGroupUsers(
+      widget.groupId,
+    );
+    final inCategoryFuture = userGroupController.isUserInCategory(
+      currentUserId,
+      widget.categoryId,
+    );
 
     final courseId = await courseIdFuture;
-    isTeacher.value = courseId != null &&
+    isTeacher.value =
+        courseId != null &&
         coursesController.courses.any(
           (c) => c.id == courseId && c.teacherId == currentUserId,
         );
@@ -72,9 +78,10 @@ class _GroupMembersListState extends State<GroupMembersList> {
     final ids = userGroupController.groupUsers.toList();
     final users = await fakeUserController.getUsersByIds(ids);
 
-    // Para cada usuario pedimos sus promedios agregados 
+    // Para cada usuario pedimos sus promedios agregados
     final futures = users.map((u) async {
-      final avg = await assessmentController.getAverageRatingsAcrossAllActivities(u.authId);
+      final avg = await assessmentController
+          .getAverageRatingsAcrossAllActivities(u.authId);
       return _UserStats(
         userId: u.authId,
         userName: u.name,
@@ -111,34 +118,47 @@ class _GroupMembersListState extends State<GroupMembersList> {
         return Column(
           children: [
             // Header con promedio general del grupo
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text("Promedio del grupo", style: TextStyle(fontWeight: FontWeight.bold)),
-                            SizedBox(height: 6),
-                            Text("Promedio general de los estudiantes de este grupo"),
-                          ],
+            if (isTeacher.value)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                "Promedio del grupo",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "Promedio general de los estudiantes de este grupo",
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Text(
-                        overallAverage.toStringAsFixed(2),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                    ],
+                        Text(
+                          overallAverage.toStringAsFixed(2),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-
             // Lista de estudiantes con sus promedios
             Expanded(
               child: Obx(() {
@@ -150,6 +170,17 @@ class _GroupMembersListState extends State<GroupMembersList> {
                   itemCount: groupStats.length,
                   itemBuilder: (_, index) {
                     final s = groupStats[index];
+                    if (!isTeacher.value) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          leading: const Icon(Icons.person),
+                          title: Text(s.userName),
+                          subtitle: Text(s.email ?? '-'),
+                        ),
+                      );
+                    }
+
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       child: Padding(
@@ -164,22 +195,36 @@ class _GroupMembersListState extends State<GroupMembersList> {
                                 Expanded(
                                   child: Text(
                                     s.userName,
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text("Correo: ${s.email ?? '-'}", style: const TextStyle(fontSize: 12)),
+                            Text(
+                              "Correo: ${s.email ?? '-'}",
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             const SizedBox(height: 8),
-                            Text("Punctuality: ${s.punctuality.toStringAsFixed(2)}"),
-                            Text("Contributions: ${s.contributions.toStringAsFixed(2)}"),
-                            Text("Commitment: ${s.commitment.toStringAsFixed(2)}"),
+                            Text(
+                              "Punctuality: ${s.punctuality.toStringAsFixed(2)}",
+                            ),
+                            Text(
+                              "Contributions: ${s.contributions.toStringAsFixed(2)}",
+                            ),
+                            Text(
+                              "Commitment: ${s.commitment.toStringAsFixed(2)}",
+                            ),
                             Text("Attitude: ${s.attitude.toStringAsFixed(2)}"),
                             const Divider(),
                             Text(
                               "Promedio general: ${s.general.toStringAsFixed(2)}",
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -193,7 +238,9 @@ class _GroupMembersListState extends State<GroupMembersList> {
             const Divider(),
 
             Obx(() {
-              final isMember = userGroupController.groupUsers.contains(currentUserId);
+              final isMember = userGroupController.groupUsers.contains(
+                currentUserId,
+              );
 
               if (isTeacher.value) return const SizedBox.shrink();
 

@@ -32,7 +32,7 @@ class AssessmentController extends GetxController {
               activityId: activityId,
               rater: users[i],
               toRate: users[j],
-              timeWin: timeWin, // ✅ se pasa tal cual
+              timeWin: timeWin, 
               visibility: visibility,
             ),
           );
