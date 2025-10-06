@@ -6,4 +6,5 @@ abstract class IAssessmentRepository {
   Future<List<Assessment>> getAssessmentsByActivityAndToRate(String activityId, String toRate);
   Future<bool> createAssessment(Assessment assessment);
   Future<bool> gradeAssessment(String assessmentId, int punctuality, int contributions, int commitment, int attitude);
+  Future<List<Assessment>> getAssessmentsByToRate(String toRate);
 }

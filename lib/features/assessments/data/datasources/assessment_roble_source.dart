@@ -148,4 +148,23 @@ class AssessmentRobleDataSource implements IAssessmentDataSource {
 
     return res.statusCode == 200;
   }
+    @override
+  Future<List<Assessment>> getAssessmentsByToRate(String toRate) async {
+    final token = await _getToken();
+    if (token == null) return [];
+
+    final uri = Uri.parse("$baseUrl/read").replace(queryParameters: {
+      "tableName": "assessments",
+      "to_rate": toRate,
+    });
+
+    final res = await httpClient.get(uri, headers: {"Authorization": "Bearer $token"});
+    if (res.statusCode == 200) {
+      final list = jsonDecode(res.body) as List;
+      return list.map((e) => Assessment.fromMap(e)).toList();
+    }
+    print("getAssessmentsByToRate failed: ${res.statusCode} ${res.body}");
+    return [];
+  }
+
 }

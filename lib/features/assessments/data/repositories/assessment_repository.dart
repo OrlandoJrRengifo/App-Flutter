@@ -23,4 +23,7 @@ class AssessmentRepository implements IAssessmentRepository {
   @override
   Future<bool> gradeAssessment(String assessmentId, int punctuality, int contributions, int commitment, int attitude) =>
       dataSource.gradeAssessment(assessmentId, punctuality, contributions, commitment, attitude);
+
+  @override
+  Future<List<Assessment>> getAssessmentsByToRate(String toRate) => dataSource.getAssessmentsByToRate(toRate);
 }

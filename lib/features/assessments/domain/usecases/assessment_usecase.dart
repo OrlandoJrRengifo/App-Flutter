@@ -17,4 +17,6 @@ class AssessmentUseCase {
 
   Future<bool> gradeAssessment(String assessmentId, int punctuality, int contributions, int commitment, int attitude) =>
       repository.gradeAssessment(assessmentId, punctuality, contributions, commitment, attitude);
+
+       Future<List<Assessment>> getAssessmentsByToRate(String toRate) => repository.getAssessmentsByToRate(toRate);
 }

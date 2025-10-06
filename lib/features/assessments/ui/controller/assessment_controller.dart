@@ -156,4 +156,48 @@ class AssessmentController extends GetxController {
       "general": general,
     };
   }
+Future<Map<String, double>> getAverageRatingsAcrossAllActivities(String userId) async {
+    final list = await useCase.getAssessmentsByToRate(userId);
+
+    if (list.isEmpty) {
+      return {
+        "punctuality": 0,
+        "contributions": 0,
+        "commitment": 0,
+        "attitude": 0,
+        "general": 0,
+      };
+    }
+
+    final rated = list.where((a) => a.punctuality != null).toList();
+    if (rated.isEmpty) {
+      return {
+        "punctuality": 0,
+        "contributions": 0,
+        "commitment": 0,
+        "attitude": 0,
+        "general": 0,
+      };
+    }
+
+    double avgPunctuality =
+        rated.map((a) => a.punctuality!).reduce((a, b) => a + b) / rated.length;
+    double avgContributions =
+        rated.map((a) => a.contributions!).reduce((a, b) => a + b) / rated.length;
+    double avgCommitment =
+        rated.map((a) => a.commitment!).reduce((a, b) => a + b) / rated.length;
+    double avgAttitude =
+        rated.map((a) => a.attitude!).reduce((a, b) => a + b) / rated.length;
+
+    double general =
+        (avgPunctuality + avgContributions + avgCommitment + avgAttitude) / 4;
+
+    return {
+      "punctuality": avgPunctuality,
+      "contributions": avgContributions,
+      "commitment": avgCommitment,
+      "attitude": avgAttitude,
+      "general": general,
+    };
+  }
 }
